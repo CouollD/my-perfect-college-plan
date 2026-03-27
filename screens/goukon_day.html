@@ -473,11 +473,11 @@ function nextTurn(){
   PARTY.forEach(fid=>{
     const traits=CHARACTERS.find(c=>c.id===fid)?.traits||[];
     const obs=G.obsession[fid]||0;
-    if(traits.includes('暴走しやすい')&&Math.random()<0.4){
+    if(traits.includes('暴走しやすい')&&Math.random()<0.2){
       G.obsession[fid]=Math.min(5,obs+1);
       H_IDS.forEach(hid=>{G.friendHeart[fid][hid]=Math.min(100,(G.friendHeart[fid][hid]||10)+3);});
     }
-    if(traits.includes('惚れっぽい')&&Math.random()<0.25){
+    if(traits.includes('惚れっぽい')&&Math.random()<0.12){
       G.obsession[fid]=Math.min(5,obs+1);
       const topH=[...H_IDS].sort((a,b)=>(G.heart[b]||0)-(G.heart[a]||0))[0];
       G.friendHeart[fid][topH]=Math.min(100,(G.friendHeart[fid][topH]||10)+8);
