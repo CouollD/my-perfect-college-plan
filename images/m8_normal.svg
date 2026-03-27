@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="240" viewBox="0 0 160 240">
+  <rect width="160" height="240" fill="#5a6a7a" rx="8"/>
+  <rect x="0" y="96.0" width="160" height="144.0" fill="#5a6a7a" opacity="0.7"/>
+  <circle cx="80" cy="67.2" r="35.2" fill="#f5f0e6" opacity="0.9"/>
+  <text x="80" y="76.8" text-anchor="middle" font-size="28" font-family="serif">😐</text>
+  <text x="80" y="172.79999999999998" text-anchor="middle" font-size="13" fill="#f5f0e6" font-family="serif">だいすけ</text>
+  <text x="80" y="204.0" text-anchor="middle" font-size="10" fill="#f5f0e6" opacity="0.7" font-family="monospace">placeholder</text>
+</svg>

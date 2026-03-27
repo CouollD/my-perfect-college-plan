@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録 — 友達一覧</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<style>
+body{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,transparent calc(100% - 1px),rgba(192,57,43,0.15) calc(100% - 1px));background-size:100% 28px,100% 100%;background-position:0 12px,0 0;}
+.hd{padding:28px 24px 0;position:relative;}
+.hd::before{content:'';position:absolute;left:58px;top:0;bottom:-20px;width:1.5px;background:rgba(192,57,43,0.3);}
+.hd-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--pencil);margin-left:48px;margin-bottom:6px;letter-spacing:.1em;}
+.hd-title{font-size:24px;font-weight:800;margin-left:48px;line-height:1.1;position:relative;display:inline-block;}
+.hd-title::after{content:'';position:absolute;left:-2px;right:-4px;bottom:-4px;height:3px;background:var(--ink);border-radius:1px;}
+.hd-memo{position:absolute;top:28px;right:20px;font-family:'Yomogi',cursive;font-size:10px;color:var(--blue);transform:rotate(2deg);line-height:1.6;opacity:.8;}
+
+/* フィルタータブ */
+.filter-wrap{padding:16px 24px 0 58px;}
+.filter-label{font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);margin-bottom:8px;}
+.filters{display:flex;gap:5px;flex-wrap:wrap;}
+.ftab{padding:4px 10px;border:1.5px solid var(--rule2);border-radius:16px;font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);cursor:pointer;transition:all .15s;background:var(--paper2);}
+.ftab:active{transform:scale(.96);}
+.ftab.active{border-color:var(--ink);color:var(--ink);background:var(--paper);font-weight:700;box-shadow:1px 2px 0 rgba(28,26,20,0.1);}
+
+/* グループラベル */
+.group-label{font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);padding:14px 24px 6px 58px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:6px;}
+.group-dot{width:6px;height:6px;border-radius:50%;background:var(--ink2);flex-shrink:0;}
+
+/* 友達カード */
+.friend-list{padding:0 24px 0 58px;display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.fc{background:var(--paper);border:2px solid var(--ink2);border-radius:10px 12px 10px 12px / 12px 10px 12px 10px;padding:12px 14px;cursor:pointer;transition:all .15s;box-shadow:2px 2px 0 rgba(28,26,20,0.08);position:relative;}
+.fc:hover{transform:translateY(-1px);box-shadow:3px 3px 0 rgba(28,26,20,0.13);}
+.fc.locked{opacity:.5;filter:grayscale(.4);}
+.fc.locked:hover{transform:none;box-shadow:2px 2px 0 rgba(28,26,20,0.08);}
+.fc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.fc-name{font-size:14px;font-weight:700;flex:1;}
+.fc-group{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--pencil);padding:2px 7px;border:1px solid var(--rule2);border-radius:8px;background:var(--paper2);white-space:nowrap;}
+.fc-status{font-family:'Yomogi',cursive;font-size:9px;padding:2px 8px;border-radius:8px;}
+.status-close{background:rgba(192,57,43,.08);color:var(--red);border:1px solid var(--red);}
+.status-normal{background:var(--paper2);color:var(--pencil);border:1px solid var(--rule2);}
+.status-good{background:rgba(46,125,66,.08);color:var(--ok);border:1px solid var(--ok);}
+.fc-params{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;}
+.fp{text-align:center;}
+.fp-name{font-family:'IBM Plex Mono',monospace;font-size:6px;color:var(--muted);display:block;margin-bottom:1px;}
+.fp-val{font-size:10px;font-weight:700;display:block;}
+.fc-bars{display:flex;flex-direction:column;gap:3px;}
+.fc-bar-row{display:flex;align-items:center;gap:6px;}
+.fc-bar-label{font-family:'Yomogi',cursive;font-size:8px;color:var(--pencil);width:40px;flex-shrink:0;}
+.fc-bar-track{flex:1;height:3px;background:var(--paper3);border-radius:2px;border:1px solid var(--rule2);overflow:hidden;}
+.fc-bar-fill{height:100%;border-radius:2px;transition:width .5s;}
+.fill-intimacy{background:var(--red);}
+.fill-current{background:var(--ink);}
+.fill-max{background:var(--pencil);opacity:.4;}
+.fc-note{font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);padding-top:6px;border-top:1px solid var(--rule);line-height:1.6;}
+.fc-note.warn{color:var(--red);}
+.fc-traits{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.trait{font-family:'Yomogi',cursive;font-size:8px;padding:2px 6px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule2);color:var(--ink2);}
+.trait.danger{background:rgba(192,57,43,.08);color:var(--red);border-color:var(--red);}
+.trait.good{background:rgba(46,125,66,.08);color:var(--ok);border-color:var(--ok);}
+.lock-badge{position:absolute;top:8px;right:10px;font-family:'Yomogi',cursive;font-size:9px;color:var(--muted);}
+
+/* 詳細展開 */
+.fc-detail{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);}
+.fc-detail.open{display:block;}
+.fc-cmd{background:rgba(44,74,138,.06);border-left:2px solid var(--blue);border-radius:0 6px 6px 0;padding:6px 10px;margin-top:6px;}
+.fc-cmd-label{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--blue);margin-bottom:3px;letter-spacing:.1em;}
+.fc-cmd-name{font-size:11px;font-weight:700;margin-bottom:2px;}
+.fc-cmd-desc{font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);line-height:1.6;}
+
+/* 戻るボタン */
+.back-wrap{padding:20px 24px 0 58px;}
+.back-btn{width:100%;padding:14px;background:var(--paper2);border:2px solid var(--ink2);border-radius:30px;font-family:'Yomogi',cursive;font-size:13px;color:var(--ink);cursor:pointer;transition:all .15s;box-shadow:2px 3px 0 rgba(28,26,20,0.1);}
+.back-btn:hover{background:var(--ink);color:var(--paper);}
+.pad{height:30px;}
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="hd">
+    <div class="hd-eyebrow">FRIENDS — 友達一覧</div>
+    <div class="hd-memo">誰を<br>連れていく？</div>
+    <div class="hd-title">仲間たち</div>
+  </div>
+
+  <div class="filter-wrap">
+    <div class="filter-label">← グループで絞る</div>
+    <div class="filters">
+      <div class="ftab active" data-f="all" onclick="setFilter(this)">全員</div>
+      <div class="ftab" data-f="circle" onclick="setFilter(this)">サークル</div>
+      <div class="ftab" data-f="class" onclick="setFilter(this)">ゼミ</div>
+      <div class="ftab" data-f="part" onclick="setFilter(this)">バイト</div>
+      <div class="ftab" data-f="old" onclick="setFilter(this)">幼馴染</div>
+    </div>
+  </div>
+
+  <div id="friends-area"></div>
+
+  <div class="back-wrap">
+    <button class="back-btn" onclick="history.back()">← 戻る</button>
+  </div>
+  <div class="pad"></div>
+</div>
+
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script src="../data/flags.js"></script>
+<script>
+const CFG = loadConfig();
+let currentFilter='all';
+
+const GRADE=v=>v>=81?'◎◎':v>=61?'◎':v>=41?'○':v>=21?'△':'×';
+const GCLS=v=>v>=81?'grade-ss':v>=61?'grade-s':v>=41?'grade-a':v>=21?'grade-b':'grade-x';
+const PLABELS={comm:'コミュ',visu:'ビジュ',head:'頭',tact:'手際',air:'空気',mental:'心',sake:'酒'};
+const GROUP_LABELS={circle:'サークル仲間',class:'授業・ゼミ仲間',part:'バイト仲間',old:'幼馴染'};
+const GROUPS=['circle','class','part','old'];
+
+function setFilter(el){
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter=el.dataset.f;
+  render();
+}
+
+function getIntimacy(c){
+  // localStorage からゲーム状態があれば取得、なければ0
+  const state=JSON.parse(localStorage.getItem('goukon_friend_state')||'{}');
+  return state[c.id]?.intimacy||0;
+}
+
+function getStatusLabel(c,intimacy){
+  if(c.locked) return {label:'まだ会っていない',cls:'status-normal'};
+  if(intimacy>=60) return {label:'仲いい',cls:'status-good'};
+  if(intimacy>=30) return {label:'顔見知り',cls:'status-normal'};
+  return {label:'接点あり',cls:'status-normal'};
+}
+
+function render(){
+  const area=document.getElementById('friends-area');
+  area.innerHTML='';
+
+  GROUPS.forEach(group=>{
+    const members=CHARACTERS.filter(c=>c.group===group&&(currentFilter==='all'||currentFilter===group));
+    if(!members.length) return;
+
+    const glabel=document.createElement('div');
+    glabel.className='group-label';
+    glabel.innerHTML=`<div class="group-dot"></div>${GROUP_LABELS[group]}`;
+    area.appendChild(glabel);
+
+    const list=document.createElement('div');
+    list.className='friend-list';
+
+    members.forEach(c=>{
+      const intimacy=getIntimacy(c);
+      const status=getStatusLabel(c,intimacy);
+      const fc=FRIEND_COMMANDS[c.id];
+
+      const card=document.createElement('div');
+      card.className='fc'+(c.locked?' locked':'');
+      card.onclick=()=>toggleDetail(card);
+
+      // パラメータ表示
+      const paramsHtml=Object.entries(PLABELS).map(([k,label])=>`
+        <div class="fp">
+          <span class="fp-name">${label}</span>
+          <span class="fp-val ${GCLS(c.params[k]||0)}">${GRADE(c.params[k]||0)}</span>
+        </div>`).join('');
+
+      // 特性バッジ
+      const traitsHtml=(c.traits||[]).map(t=>{
+        const cls=t==='暴走しやすい'||t==='惚れっぽい'?'danger':t==='譲れる'?'good':'';
+        return `<span class="trait ${cls}">${t}</span>`;
+      }).join('');
+
+      // 固有コマンド
+      const cmdHtml=fc?`
+        <div class="fc-cmd">
+          <div class="fc-cmd-label">固有コマンド（親密度${fc.unlock}以上で解放）</div>
+          <div class="fc-cmd-name">${fc.name}</div>
+          <div class="fc-cmd-desc">${c.note}</div>
+        </div>`:'' ;
+
+      card.innerHTML=`
+        ${c.locked?`<div class="lock-badge">🔒 未解放</div>`:''}
+        <div class="fc-top">
+          <div class="fc-name">${c.name}</div>
+          <div class="fc-group">${c.tag}</div>
+          <div class="fc-status ${status.cls}">${status.label}</div>
+        </div>
+        <div class="fc-params">${paramsHtml}</div>
+        <div class="fc-bars">
+          <div class="fc-bar-row">
+            <div class="fc-bar-label">現在値</div>
+            <div class="fc-bar-track"><div class="fc-bar-fill fill-current" style="width:${Math.round(Object.values(c.params).reduce((a,b)=>a+b,0)/7)}%"></div></div>
+          </div>
+          <div class="fc-bar-row">
+            <div class="fc-bar-label">MAX値</div>
+            <div class="fc-bar-track"><div class="fc-bar-fill fill-max" style="width:${Math.round(Object.values(c.maxParams).reduce((a,b)=>a+b,0)/7)}%"></div></div>
+          </div>
+          <div class="fc-bar-row">
+            <div class="fc-bar-label">親密度</div>
+            <div class="fc-bar-track"><div class="fc-bar-fill fill-intimacy" style="width:${intimacy}%"></div></div>
+          </div>
+        </div>
+        <div class="fc-traits">${traitsHtml}</div>
+        <div class="fc-detail" id="detail-${c.id}">
+          <div class="fc-note ${c.limit?'warn':''}">${c.locked?'🔒 まだ接点がない。':c.limit?'⚠ '+c.limit+'　':''} ${c.note}</div>
+          ${cmdHtml}
+        </div>`;
+      list.appendChild(card);
+    });
+
+    area.appendChild(list);
+  });
+}
+
+function toggleDetail(card){
+  const detail=card.querySelector('.fc-detail');
+  if(detail) detail.classList.toggle('open');
+}
+
+render();
+</script>
+</body>
+</html>

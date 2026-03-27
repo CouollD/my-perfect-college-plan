@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録 — 合コン編成</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:  #f5f0e6;
+  --paper2: #ede7d8;
+  --paper3: #e4dcc8;
+  --ink:    #1c1a14;
+  --ink2:   #3a3628;
+  --rule:   rgba(28,26,20,0.10);
+  --rule2:  rgba(28,26,20,0.22);
+  --red:    #c0392b;
+  --red-t:  rgba(192,57,43,0.08);
+  --red-t2: rgba(192,57,43,0.04);
+  --blue:   #2c4a8a;
+  --pencil: #7a7060;
+  --muted:  #9a9080;
+  --ok:     #2e7d42;
+  --gold:   #8a6a00;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Shippori Mincho B1', serif;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, transparent calc(100% - 1px), rgba(192,57,43,0.15) calc(100% - 1px));
+  background-size: 100% 28px, 100% 100%;
+  background-position: 0 12px, 0 0;
+}
+#root { max-width:480px; margin:0 auto; padding-bottom:100px; position:relative; }
+
+/* ── HEADER ── */
+.hd {
+  padding: 28px 24px 0;
+  position: relative;
+}
+.hd::before {
+  content:'';
+  position:absolute;
+  left:58px; top:0; bottom:-20px;
+  width:1.5px;
+  background:rgba(192,57,43,0.3);
+  pointer-events:none;
+}
+.hd-eyebrow {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--pencil);
+  margin-left:48px;
+  margin-bottom:6px;
+  letter-spacing:.1em;
+}
+.hd-title {
+  font-size:26px;
+  font-weight:800;
+  margin-left:48px;
+  line-height:1.1;
+  position:relative;
+  display:inline-block;
+}
+.hd-title::after {
+  content:'';
+  position:absolute;
+  left:-2px;right:-4px;bottom:-4px;
+  height:3px;background:var(--ink);border-radius:1px;
+}
+.hd-badge {
+  display:inline-block;
+  margin:12px 0 0 48px;
+  padding:3px 12px;
+  border:2px solid var(--red);
+  border-radius:20px;
+  font-family:'Yomogi',cursive;
+  font-size:10px;
+  color:var(--red);
+  transform:rotate(-1deg);
+}
+.hd-memo {
+  position:absolute;
+  top:28px; right:20px;
+  font-family:'Yomogi',cursive;
+  font-size:10px;
+  color:var(--blue);
+  transform:rotate(2deg);
+  line-height:1.6;
+  opacity:.8;
+}
+
+/* ── SLOT (選んだ3人) ── */
+.slots-wrap {
+  margin: 20px 24px 0 24px;
+  position: relative;
+}
+.slots-label {
+  font-family:'Yomogi',cursive;
+  font-size:11px;
+  color:var(--pencil);
+  margin-bottom:8px;
+  margin-left:34px;
+}
+.slots {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-left:34px;
+}
+.slot {
+  background:var(--paper2);
+  border:2px dashed var(--rule2);
+  border-radius:12px;
+  padding:10px 8px;
+  text-align:center;
+  min-height:80px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  transition:all .2s;
+  cursor:pointer;
+  position:relative;
+}
+.slot.filled {
+  border-style:solid;
+  border-color:var(--ink2);
+  background:var(--paper);
+  box-shadow:2px 3px 0 rgba(28,26,20,0.12);
+}
+.slot.filled:active { transform:scale(.97); }
+.slot-empty-label {
+  font-family:'Yomogi',cursive;
+  font-size:10px;
+  color:var(--muted);
+}
+.slot-num {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--muted);
+  position:absolute;
+  top:5px; left:8px;
+}
+.slot-name {
+  font-size:11px;
+  font-weight:700;
+  line-height:1.2;
+  color:var(--ink);
+}
+.slot-attr {
+  font-family:'Yomogi',cursive;
+  font-size:9px;
+  color:var(--pencil);
+}
+.slot-remove {
+  position:absolute;
+  top:4px; right:6px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1;
+}
+
+/* ── PARTY STATS ── */
+.party-stats {
+  margin: 12px 24px 0 58px;
+  background:var(--paper2);
+  border:1.5px solid var(--rule2);
+  border-radius:10px;
+  padding:10px 12px;
+}
+.party-stats-title {
+  font-family:'Yomogi',cursive;
+  font-size:9px;
+  color:var(--pencil);
+  margin-bottom:8px;
+  display:flex;
+  justify-content:space-between;
+}
+.party-bars { display:flex; flex-direction:column; gap:5px; }
+.party-bar-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.party-bar-label {
+  font-size:9px;
+  color:var(--ink2);
+  width:52px;
+  flex-shrink:0;
+}
+.party-bar-track {
+  flex:1;
+  height:6px;
+  background:var(--paper3);
+  border-radius:3px;
+  border:1px solid var(--rule);
+  overflow:hidden;
+}
+.party-bar-fill {
+  height:100%;
+  background:var(--ink);
+  border-radius:3px;
+  transition:width .4s ease;
+}
+.party-bar-val {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--pencil);
+  width:20px;
+  text-align:right;
+}
+/* 戦略スコア */
+.strategy-row {
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid var(--rule);
+}
+.strat-item {
+  flex:1;
+  text-align:center;
+  padding:6px 4px;
+  border-radius:8px;
+  background:var(--paper3);
+  border:1px solid var(--rule);
+}
+.strat-label {
+  font-family:'Yomogi',cursive;
+  font-size:8px;
+  color:var(--pencil);
+  margin-bottom:2px;
+}
+.strat-val {
+  font-size:14px;
+  font-weight:800;
+  color:var(--ink);
+}
+.strat-item.best { border-color:var(--red); background:var(--red-t); }
+.strat-item.best .strat-val { color:var(--red); }
+
+/* ── FILTER TABS ── */
+.filter-wrap {
+  margin: 20px 24px 0 58px;
+}
+.filter-label {
+  font-family:'Yomogi',cursive;
+  font-size:11px;
+  color:var(--pencil);
+  margin-bottom:8px;
+}
+.filter-tabs {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.ftab {
+  padding:4px 12px;
+  border:1.5px solid var(--rule2);
+  border-radius:20px;
+  font-family:'Yomogi',cursive;
+  font-size:10px;
+  color:var(--pencil);
+  cursor:pointer;
+  transition:all .15s;
+  background:var(--paper2);
+}
+.ftab:active { transform:scale(.96); }
+.ftab.active {
+  border-color:var(--ink);
+  color:var(--ink);
+  background:var(--paper);
+  font-weight:700;
+  box-shadow:1px 2px 0 rgba(28,26,20,0.1);
+}
+
+/* ── FRIEND LIST ── */
+.friends-wrap {
+  margin: 16px 0 0 0;
+  padding: 0 24px 0 58px;
+}
+.friends-section-label {
+  font-family:'Yomogi',cursive;
+  font-size:10px;
+  color:var(--pencil);
+  margin-bottom:6px;
+  padding-bottom:4px;
+  border-bottom:1px solid var(--rule);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.friends-section-dot {
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--ink2);
+  flex-shrink:0;
+}
+.friend-list { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+
+.friend-card {
+  background:var(--paper);
+  border:2px solid var(--ink2);
+  border-radius:10px 12px 10px 12px / 12px 10px 12px 10px;
+  padding:10px 12px;
+  cursor:pointer;
+  transition:all .15s;
+  position:relative;
+  box-shadow:2px 2px 0 rgba(28,26,20,0.08);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.friend-card:hover { transform:translateY(-1px); box-shadow:3px 4px 0 rgba(28,26,20,0.12); }
+.friend-card:active { transform:scale(.98); }
+.friend-card.selected {
+  border-color:var(--red);
+  background:var(--red-t2);
+  box-shadow:3px 3px 0 rgba(192,57,43,0.2);
+}
+.friend-card.disabled {
+  opacity:.45;
+  cursor:not-allowed;
+  filter:grayscale(.5);
+}
+.friend-card.disabled:hover { transform:none; box-shadow:2px 2px 0 rgba(28,26,20,0.08); }
+
+.friend-top {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.friend-check {
+  width:18px;height:18px;
+  border:2px solid var(--rule2);
+  border-radius:50%;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  color:transparent;
+  transition:all .15s;
+  background:var(--paper2);
+}
+.friend-card.selected .friend-check {
+  border-color:var(--red);
+  background:var(--red);
+  color:#fff;
+}
+.friend-name {
+  font-size:14px;
+  font-weight:700;
+  flex:1;
+}
+.friend-card.selected .friend-name { color:var(--red); }
+.friend-group-tag {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  color:var(--pencil);
+  padding:2px 6px;
+  border:1px solid var(--rule2);
+  border-radius:8px;
+  background:var(--paper2);
+  white-space:nowrap;
+}
+
+/* パラメータグリッド */
+.friend-params {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:3px;
+}
+.param-cell {
+  text-align:center;
+}
+.param-name {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:7px;
+  color:var(--muted);
+  margin-bottom:2px;
+  display:block;
+}
+.param-grade {
+  font-size:11px;
+  font-weight:700;
+  display:block;
+  line-height:1;
+}
+.grade-ss { color:var(--red); }
+.grade-s  { color:var(--ink); }
+.grade-a  { color:var(--ink2); }
+.grade-b  { color:var(--pencil); }
+.grade-x  { color:var(--muted); }
+
+/* 制約・特記 */
+.friend-note {
+  font-family:'Yomogi',cursive;
+  font-size:9px;
+  color:var(--pencil);
+  line-height:1.5;
+  padding-top:4px;
+  border-top:1px solid var(--rule);
+}
+.friend-note.warn { color:var(--red); }
+
+/* ── CONFIRM BTN ── */
+.confirm-bar {
+  position:fixed;
+  bottom:0; left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  padding:12px 24px 24px;
+  background:linear-gradient(to top, var(--paper) 60%, transparent);
+}
+.confirm-btn {
+  width:100%;
+  background:var(--ink);
+  border:2.5px solid var(--ink);
+  border-radius:30px;
+  padding:16px;
+  color:var(--paper);
+  font-family:'Yomogi',cursive;
+  font-size:14px;
+  letter-spacing:.1em;
+  cursor:pointer;
+  transition:all .15s;
+  box-shadow:4px 5px 0 rgba(28,26,20,0.2);
+}
+.confirm-btn:not(:disabled):hover {
+  background:var(--red);
+  border-color:var(--red);
+  box-shadow:5px 6px 0 rgba(192,57,43,0.25);
+  transform:translateY(-1px);
+}
+.confirm-btn:not(:disabled):active {
+  transform:translateY(1px);
+  box-shadow:2px 2px 0 rgba(28,26,20,0.2);
+}
+.confirm-btn:disabled {
+  background:var(--paper3);
+  border-color:var(--rule2);
+  color:var(--muted);
+  cursor:not-allowed;
+  box-shadow:none;
+}
+</style>
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script src="../data/flags.js"></script>
+</head>
+<body>
+<div id="root">
+
+  <div class="hd">
+    <div class="hd-eyebrow">GOUKON FORMATION — 合コン編成</div>
+    <div class="hd-memo">誰を切る？</div>
+    <div class="hd-title">布陣を組め</div>
+    <div class="hd-badge">3人選ぶ</div>
+  </div>
+
+  <!-- 選択スロット -->
+  <div class="slots-wrap">
+    <div class="slots-label">← メンバー（3人まで）</div>
+    <div class="slots" id="slots">
+      <div class="slot" id="slot-0" onclick="removeSlot(0)">
+        <div class="slot-num">01</div>
+        <div class="slot-empty-label">あき</div>
+      </div>
+      <div class="slot" id="slot-1" onclick="removeSlot(1)">
+        <div class="slot-num">02</div>
+        <div class="slot-empty-label">あき</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- パーティステータス -->
+  <div class="party-stats">
+    <div class="party-stats-title">
+      <span>パーティ合計パラメータ</span>
+      <span id="party-count" style="font-family:'IBM Plex Mono',monospace">0/3人</span>
+    </div>
+    <div class="party-bars">
+      <div class="party-bar-row"><div class="party-bar-label">コミュ力</div><div class="party-bar-track"><div class="party-bar-fill" id="pb-comm" style="width:0%"></div></div><div class="party-bar-val" id="pv-comm">—</div></div>
+      <div class="party-bar-row"><div class="party-bar-label">ビジュ</div><div class="party-bar-track"><div class="party-bar-fill" id="pb-visu" style="width:0%"></div></div><div class="party-bar-val" id="pv-visu">—</div></div>
+      <div class="party-bar-row"><div class="party-bar-label">頭</div><div class="party-bar-track"><div class="party-bar-fill" id="pb-head" style="width:0%"></div></div><div class="party-bar-val" id="pv-head">—</div></div>
+      <div class="party-bar-row"><div class="party-bar-label">手際</div><div class="party-bar-track"><div class="party-bar-fill" id="pb-tact" style="width:0%"></div></div><div class="party-bar-val" id="pv-tact">—</div></div>
+      <div class="party-bar-row"><div class="party-bar-label">空気読み</div><div class="party-bar-track"><div class="party-bar-fill" id="pb-air" style="width:0%"></div></div><div class="party-bar-val" id="pv-air">—</div></div>
+      <div class="party-bar-row"><div class="party-bar-label">メンタル</div><div class="party-bar-track"><div class="party-bar-fill" id="pb-mental" style="width:0%"></div></div><div class="party-bar-val" id="pv-mental">—</div></div>
+    </div>
+    <div class="strategy-row">
+      <div class="strat-item" id="strat-all">
+        <div class="strat-label">全体最適スコア</div>
+        <div class="strat-val" id="sv-all">—</div>
+      </div>
+      <div class="strat-item" id="strat-self">
+        <div class="strat-label">自分最適スコア</div>
+        <div class="strat-val" id="sv-self">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- シナジー表示 -->
+  <div id="synergy-wrap" style="margin:8px 24px 0 58px;display:none;">
+    <div style="font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);margin-bottom:6px;">← 編成シナジー</div>
+    <div id="synergy-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+  </div>
+
+  <!-- 自分ステータス -->
+  <div id="self-status-wrap" style="margin:12px 24px 0 58px;background:var(--paper2);border:1.5px solid var(--rule2);border-radius:10px;padding:10px 12px;"></div>
+
+  <!-- フィルター -->
+  <div class="filter-wrap">
+    <div class="filter-label">← グループで絞る</div>
+    <div class="filter-tabs" id="filter-tabs">
+      <!-- 動的生成 -->
+    </div>
+  </div>
+
+  <!-- 友達リスト -->
+  <div class="friends-wrap" id="friends-wrap"></div>
+
+  <!-- 確定ボタン -->
+  <div class="confirm-bar">
+    <button class="confirm-btn" id="confirm-btn" disabled onclick="confirmFormation()">
+      この布陣で行く！→ 座席を決める
+    </button>
+  </div>
+
+</div>
+
+
+const PARAMS = ['comm','visu','head','tact','air','mental'];
+const PLABEL = {comm:'コミュ力',visu:'ビジュ',head:'頭',tact:'手際',air:'空気読み',mental:'メンタル'};
+// GRADE / GRADE_CLASS / GCLS は gamedata.js で定義済み
+const GCLS = GRADE_CLASS;
+
+let selected = []; // max 3 ids
+let currentFilter = 'all';
+
+function gradeClass(v){ return GCLS(v); }
+
+// ── レンダリング ──
+function renderFriends(){
+  const wrap = document.getElementById('friends-wrap');
+  wrap.innerHTML = '';
+
+  const groups = [
+    { key:'circle', label:'サークル仲間' },
+    { key:'class',  label:'授業・ゼミ仲間' },
+    { key:'part',   label:'バイト仲間' },
+    { key:'old',    label:'幼馴染' },
+  ];
+
+  // フィルターが env_ の場合はマッチ理由ごとにセクション分け
+  const isEnvFilter = currentFilter.startsWith('env_') && currentFilter !== 'env_class' && currentFilter !== 'env_old';
+  const config_ = loadConfig();
+
+  let sectionDefs;
+  if(currentFilter === 'all'){
+    // 全員：グループ別
+    sectionDefs = [
+      { key:'circle', label:'サークル仲間', members: CHARACTERS.filter(c=>c.group==='circle'&&!c._envLocked&&!c.locked) },
+      { key:'class',  label:'ゼミ仲間',     members: CHARACTERS.filter(c=>c.group==='class' &&!c._envLocked&&!c.locked) },
+      { key:'part',   label:'バイト仲間',   members: CHARACTERS.filter(c=>c.group==='part'  &&!c._envLocked&&!c.locked) },
+      { key:'old',    label:'幼馴染',       members: CHARACTERS.filter(c=>c.group==='old'   &&!c.locked) },
+    ];
+  } else if(currentFilter === 'env_class'){
+    sectionDefs = [{ key:'class', label:'ゼミ仲間', members: CHARACTERS.filter(c=>c.group==='class') }];
+  } else if(currentFilter === 'env_old'){
+    sectionDefs = [{ key:'old', label:'幼馴染', members: CHARACTERS.filter(c=>c.group==='old') }];
+  } else {
+    // env_circle_sports / env_part_izakaya 等：
+    // 同じサークルのメンバー・同じバイトのメンバーを別セクションで重複表示
+    const parts_ = currentFilter.split('_');
+    const envKey = parts_[1]; // 'circle' or 'part' or 'living'
+    const envVal = parts_.slice(2).join('_');
+
+    const byCircle = CHARACTERS.filter(c=>!c.locked && c.circle === config_?.circle && config_?.circle !== 'none');
+    const byPart   = CHARACTERS.filter(c=>!c.locked && c.part   === config_?.part   && config_?.part   !== 'none');
+    const classMembers = CHARACTERS.filter(c=>!c.locked && c.group==='class');
+    const oldMembers   = CHARACTERS.filter(c=>!c.locked && c.group==='old');
+
+    sectionDefs = [];
+    if(byCircle.length && config_?.circle !== 'none'){
+      const label = {sports:'体育会系サークル仲間',culture:'文化系サークル仲間'}[config_?.circle]||'サークル仲間';
+      sectionDefs.push({ key:'circle_env', label, members: byCircle });
+    }
+    if(byPart.length && config_?.part !== 'none'){
+      const label = {izakaya:'居酒屋バイト仲間',cafe:'カフェバイト仲間',juku:'塾バイト仲間'}[config_?.part]||'バイト仲間';
+      sectionDefs.push({ key:'part_env', label, members: byPart });
+    }
+    if(classMembers.length) sectionDefs.push({ key:'class', label:'授業・ゼミ仲間', members: classMembers });
+    if(oldMembers.length)   sectionDefs.push({ key:'old',   label:'幼馴染',         members: oldMembers });
+  }
+
+  // セクション描画
+  const visibleGroups = ['circle','class','part','old']; // 旧コードとの互換用（未使用）
+  sectionDefs.forEach(g => {
+    const members = g.members;
+    if(!members.length) return;
+
+    const sec = document.createElement('div');
+    sec.innerHTML = `<div class="friends-section-label"><div class="friends-section-dot"></div>${g.label}</div>`;
+    const list = document.createElement('div');
+    list.className = 'friend-list';
+
+    members.forEach(c => {
+      const isSelected = selected.includes(c.id);
+      const isFull = selected.length >= 2 && !isSelected;
+      const isEnvLocked = c._envLocked === true;
+      const isDisabled = c.locked || isEnvLocked || (isFull && !isSelected);
+
+      const card = document.createElement('div');
+      card.className = 'friend-card' + (isSelected?' selected':'') + (isDisabled?' disabled':'');
+      card.onclick = () => { if(!isDisabled) toggleFriend(c.id); };
+
+      // params html
+      const paramsHtml = PARAMS.map(p => `
+        <div class="param-cell">
+          <span class="param-name">${{comm:'コミュ',visu:'ビジュ',head:'頭',tact:'手際',air:'空気',mental:'心'}[p]}</span>
+          <span class="param-grade ${GCLS(c.params[p])}">${GRADE(c.params[p])}</span>
+        </div>`).join('');
+
+      // 環境タグ生成（circle/living/partはフラット）
+      const envTags = [
+        {none:'',culture:'文化系',sports:'体育会'}[c.circle]||'',
+        {none:'',izakaya:'居酒屋',cafe:'カフェ',juku:'塾'}[c.part]||'',
+        {home:'実家',alone_send:'仕送り↑',alone_nosend:'仕送り↓'}[c.living]||'',
+      ].filter(Boolean).map(t=>`<span style="font-family:'IBM Plex Mono',monospace;font-size:7px;padding:1px 5px;border-radius:6px;border:1px solid var(--rule2);color:var(--pencil);background:var(--paper2)">${t}</span>`).join('');
+
+      card.innerHTML = `
+        <div class="friend-top">
+          <div class="friend-check">${isSelected?'✓':''}</div>
+          <div class="friend-name">${c.name}</div>
+          <div class="friend-group-tag">${c.tag}</div>
+        </div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">${envTags}</div>
+        <div class="friend-params">${paramsHtml}</div>
+        <div class="friend-note${c.locked?' warn':c.limit?' warn':''}">${c.locked?'🔒 まだ出会っていない':(c.limit?'⚠ '+c.limit+'　':'')+c.note}</div>`;
+
+      list.appendChild(card);
+    });
+
+    sec.appendChild(list);
+    wrap.appendChild(sec);
+  });
+}
+
+function renderSlots(){
+  selected.forEach((id, i) => {
+    const c = CHARACTERS.find(x=>x.id===id);
+    const slot = document.getElementById('slot-'+i);
+    slot.className = 'slot filled';
+    slot.innerHTML = `
+      <div class="slot-num">0${i+1}</div>
+      <div class="slot-remove">×</div>
+      <div class="slot-name">${c.name.split(' ')[1]||c.name}</div>
+      <div class="slot-attr">${c.tag}</div>`;
+  });
+  for(let i=selected.length; i<2; i++){
+    const slot = document.getElementById('slot-'+i);
+    slot.className = 'slot';
+    slot.innerHTML = `<div class="slot-num">0${i+1}</div><div class="slot-empty-label">あき</div>`;
+  }
+}
+
+function renderPartyStats(){
+  document.getElementById('party-count').textContent = selected.length+'/2人';
+  if(!selected.length){
+    PARAMS.forEach(p=>{
+      document.getElementById('pb-'+p).style.width='0%';
+      document.getElementById('pv-'+p).textContent='—';
+    });
+    document.getElementById('sv-all').textContent='—';
+    document.getElementById('sv-self').textContent='—';
+    document.getElementById('strat-all').classList.remove('best');
+    document.getElementById('strat-self').classList.remove('best');
+    return;
+  }
+  const members = selected.map(id=>CHARACTERS.find(c=>c.id===id));
+
+  // 自分のステータスをlocalStorageから取得
+  const config = loadConfig();
+  const selfParams = config?.self || { comm:50,visu:50,head:50,tact:50,air:50,mental:50,sake:50 };
+  const selfMember = { name:'自分', params: selfParams };
+
+  // パーティ = 自分 + 友達3人
+  const allMembers = [selfMember, ...members];
+
+  // 平均値（自分含む4人）
+  PARAMS.forEach(p=>{
+    const avg = Math.round(allMembers.reduce((s,c)=>s+(c.params[p]||0),0)/allMembers.length);
+    document.getElementById('pb-'+p).style.width=avg+'%';
+    document.getElementById('pv-'+p).textContent=avg;
+  });
+
+  // 全体最適スコア：自分含む4人のコミュ力+空気読み+手際の平均
+  const allScore = Math.round(allMembers.reduce((s,c)=>s+((c.params.comm||0)+(c.params.air||0)+(c.params.tact||0))/3,0)/allMembers.length);
+  // 自分最適スコア：友達3人の中で自分が相対的に突出しているか
+  const friendAvgComm = Math.round(members.reduce((s,c)=>s+c.params.comm,0)/members.length);
+  const friendAvgVisu = Math.round(members.reduce((s,c)=>s+c.params.visu,0)/members.length);
+  const selfScore = Math.round(((selfParams.comm - friendAvgComm) + (selfParams.visu - friendAvgVisu)) / 2 + 50);
+
+  document.getElementById('sv-all').textContent=allScore;
+  document.getElementById('sv-self').textContent=selfScore;
+
+  const allEl = document.getElementById('strat-all');
+  const selfEl = document.getElementById('strat-self');
+  allEl.classList.toggle('best', allScore >= selfScore);
+  selfEl.classList.toggle('best', selfScore > allScore);
+
+  // シナジー計算・表示
+  renderSynergy();
+}
+
+function renderSynergy(){
+  const wrap = document.getElementById('synergy-wrap');
+  const list = document.getElementById('synergy-list');
+  if(!wrap||!list) return;
+
+  const heroineIds = JSON.parse(localStorage.getItem('goukon_heroines')||'[101,102,103]');
+  const cfg = loadConfig();
+  const result = calcSynergy(selected, heroineIds, cfg);
+  const synergies = result.synergies;
+
+  if(!synergies.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  list.innerHTML = synergies.map(s=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${s.type==='heroine'?'rgba(44,74,138,0.05)':'rgba(46,125,66,0.05)'};border:1px solid ${s.type==='heroine'?'rgba(44,74,138,0.2)':'rgba(46,125,66,0.2)'};border-radius:8px;">
+      <span style="font-size:14px;">${s.icon}</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:${s.type==='heroine'?'var(--blue)':'var(--ok)'};">${s.label}</div>
+        <div style="font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);">${s.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleFriend(id){
+  if(selected.includes(id)){
+    selected = selected.filter(x=>x!==id);
+  } else {
+    if(selected.length>=2) return;
+    selected.push(id);
+  }
+  renderSlots();
+  renderPartyStats();
+  renderFriends();
+  document.getElementById('confirm-btn').disabled = selected.length !== 2;
+}
+
+function removeSlot(i){
+  if(selected[i]){
+    selected.splice(i,1);
+    renderSlots();
+    renderPartyStats();
+    renderFriends();
+    document.getElementById('confirm-btn').disabled = selected.length !== 2;
+  }
+}
+
+function setFilter(el){
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = el.dataset.f;
+  renderFriends();
+}
+
+function matchesFilter(c, filter){
+  if(filter === 'all') return true;
+  // グループ直接指定
+  if(filter === 'env_class') return c.group === 'class';
+  if(filter === 'env_old')   return c.group === 'old';
+  if(filter.startsWith('env_')){
+    const parts = filter.split('_');
+    const key = parts[1];
+    const val = parts.slice(2).join('_');
+    if(key === 'living' && val === 'alone'){
+      return c.living === 'alone_send' || c.living === 'alone_nosend';
+    }
+    return c[key] === val;
+  }
+  return c.group === filter;
+}
+
+function confirmFormation(){
+  const availableHeroines = [101,102,103,104,105,106,107,108,109];
+  const shuffled = availableHeroines.sort(()=>Math.random()-.5);
+  const heroineIds = shuffled.slice(0,3);
+  localStorage.setItem('goukon_party', JSON.stringify(selected));
+  localStorage.setItem('goukon_heroines', JSON.stringify(heroineIds));
+  location.href = 'seating.html';
+}
+
+// ── 環境設定によるロック制御 ──
+function applyEnvironmentLocks(){
+  const config = loadConfig();
+  if(!config) return;
+
+  CHARACTERS.forEach(c => {
+    if(c.locked){ c._envLocked = false; return; }
+    // 自分の環境と接点があるかチェック
+    const sameCircle = config.circle !== 'none' && c.circle === config.circle;
+    const samePart   = config.part   !== 'none' && c.part   === config.part;
+    // 幼馴染・ゼミは共通で接点あり（group:'old' or 'class'）
+    const isCommon   = c.group === 'old' || c.group === 'class';
+
+    c._envLocked = !(sameCircle || samePart || isCommon);
+  });
+}
+
+// ── 自分のステータスを表示 ──
+function renderSelfStatus(){
+  const config = loadConfig();
+  if(!config?.self) return;
+  const self = config.self;
+  const wrap = document.getElementById('self-status-wrap');
+  if(!wrap) return;
+  const params = ['comm','visu','head','tact','air','mental'];
+  const labels = {comm:'コミュ',visu:'ビジュ',head:'頭',tact:'手際',air:'空気',mental:'心'};
+  wrap.innerHTML = `
+    <div style="font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);margin-bottom:6px">← 自分のステータス（自己認識）</div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px">
+      ${params.map(p=>`
+        <div style="text-align:center">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--muted);display:block;margin-bottom:2px">${labels[p]}</span>
+          <span style="font-size:11px;font-weight:700;display:block" class="${GRADE_CLASS(self[p])}">${GRADE(self[p])}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// 初期レンダリング
+applyEnvironmentLocks();
+renderFilterTabs();
+renderSlots();
+renderPartyStats();
+renderSelfStatus();
+renderFriends();
+
+function renderFilterTabs(){
+  const config = loadConfig();
+  const wrap = document.getElementById('filter-tabs');
+  if(!wrap) return;
+
+  const tabs = [{ f:'all', label:'全員' }];
+
+  // 自分が選んだサークル
+  if(config?.circle === 'sports')  tabs.push({ f:'env_circle_sports',  label:'体育会系' });
+  if(config?.circle === 'culture') tabs.push({ f:'env_circle_culture', label:'文化系' });
+
+  // 自分が選んだバイト
+  if(config?.part === 'izakaya') tabs.push({ f:'env_part_izakaya', label:'居酒屋仲間' });
+  if(config?.part === 'cafe')    tabs.push({ f:'env_part_cafe',    label:'カフェ仲間' });
+  if(config?.part === 'juku')    tabs.push({ f:'env_part_juku',    label:'塾仲間' });
+
+  // 共通（幼馴染・ゼミは常に表示）
+  tabs.push({ f:'env_class', label:'ゼミ仲間' });
+  tabs.push({ f:'env_old',   label:'幼馴染' });
+
+  wrap.innerHTML = tabs.map(t =>
+    `<div class="ftab${t.f==='all'?' active':''}" data-f="${t.f}" onclick="setFilter(this)">${t.label}</div>`
+  ).join('');
+}
+</script>
+</body>
+</html>

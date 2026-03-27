@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録 — 自分を知る</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<style>
+body{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,transparent calc(100% - 1px),rgba(192,57,43,0.15) calc(100% - 1px));background-size:100% 28px,100% 100%;background-position:0 12px,0 0;}
+.hd{padding:28px 24px 0;position:relative;}
+.hd::before{content:'';position:absolute;left:58px;top:0;bottom:-20px;width:1.5px;background:rgba(192,57,43,0.3);}
+.hd-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--pencil);margin-left:48px;margin-bottom:6px;letter-spacing:.1em;}
+.hd-title{font-size:24px;font-weight:800;margin-left:48px;line-height:1.1;position:relative;display:inline-block;}
+.hd-title::after{content:'';position:absolute;left:-2px;right:-4px;bottom:-4px;height:3px;background:var(--ink);border-radius:1px;}
+.hd-badge{display:inline-block;margin:10px 0 0 48px;padding:3px 12px;border:2px solid var(--red);border-radius:20px;font-family:'Yomogi',cursive;font-size:10px;color:var(--red);transform:rotate(-1deg);}
+.hd-memo{position:absolute;top:28px;right:20px;font-family:'Yomogi',cursive;font-size:10px;color:var(--blue);transform:rotate(2deg);line-height:1.6;opacity:.8;}
+
+/* セクション */
+.sec{padding:20px 24px 0 58px;}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+.sec-num{width:22px;height:22px;border:2px solid var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;flex-shrink:0;background:var(--paper);}
+.sec-label{font-family:'Yomogi',cursive;font-size:14px;}
+.sec-line{flex:1;}.sec-line::after{content:'';display:block;height:1.5px;background:var(--ink2);border-radius:1px;opacity:.35;}
+
+/* パラメータカード */
+.param-card{background:var(--paper);border:2px solid var(--ink2);border-radius:12px 14px 12px 14px / 14px 12px 14px 12px;box-shadow:2px 3px 0 rgba(28,26,20,0.10);overflow:hidden;}
+.param-row{display:flex;align-items:center;border-bottom:1px solid var(--rule);min-height:56px;position:relative;}
+.param-row:last-child{border-bottom:none;}
+.param-name{width:72px;padding:0 10px 0 12px;font-size:12px;font-weight:700;flex-shrink:0;border-right:1px solid var(--rule);align-self:stretch;display:flex;align-items:center;}
+.param-mid{flex:1;padding:8px 12px;display:flex;flex-direction:column;gap:4px;}
+.param-bars{display:flex;flex-direction:column;gap:3px;}
+.param-bar-row{display:flex;align-items:center;gap:6px;}
+.param-bar-label{font-family:'Yomogi',cursive;font-size:8px;color:var(--pencil);width:50px;flex-shrink:0;}
+.param-bar-track{flex:1;height:4px;background:var(--paper3);border-radius:2px;border:1px solid var(--rule2);overflow:hidden;}
+.param-bar-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.fill-self{background:var(--blue);}
+.fill-actual{background:var(--red);}
+.fill-unknown{background:var(--paper3);}
+.param-grade{width:42px;flex-shrink:0;align-self:stretch;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--rule);font-size:14px;font-weight:800;}
+.param-grade.known{color:var(--red);}
+.param-grade.unknown{color:var(--muted);}
+
+/* 乖離バッジ */
+.gap-badge{font-family:'Yomogi',cursive;font-size:8px;padding:2px 6px;border-radius:8px;white-space:nowrap;}
+.gap-match{background:rgba(46,125,66,.1);color:var(--ok);border:1px solid var(--ok);}
+.gap-high{background:rgba(192,57,43,.08);color:var(--red);border:1px solid var(--red);}
+.gap-mid{background:rgba(138,106,0,.08);color:var(--gold);border:1px solid var(--gold);}
+.gap-unknown{background:var(--paper2);color:var(--muted);border:1px solid var(--rule2);}
+
+/* 凡例 */
+.legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);}
+.legend-bar{width:16px;height:4px;border-radius:2px;}
+
+/* 戦績 */
+.record-card{background:var(--paper);border:2px solid var(--ink2);border-radius:12px 14px 12px 14px / 14px 12px 14px 12px;box-shadow:2px 3px 0 rgba(28,26,20,0.10);padding:14px 16px;}
+.record-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.record-item{background:var(--paper2);border:1px solid var(--rule2);border-radius:8px;padding:10px;text-align:center;}
+.record-val{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--ink);}
+.record-val.red{color:var(--red);}
+.record-val.blue{color:var(--blue);}
+.record-label{font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);margin-top:2px;}
+
+/* 頭ロック */
+.locked-box{background:rgba(44,74,138,.06);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;}
+.locked-label{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--blue);margin-bottom:4px;letter-spacing:.1em;}
+.locked-text{font-family:'Yomogi',cursive;font-size:11px;color:var(--pencil);line-height:1.7;}
+
+/* ヒント */
+.hint-box{background:rgba(192,57,43,.04);border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:12px;}
+.hint-label{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--red);margin-bottom:4px;letter-spacing:.1em;}
+.hint-text{font-family:'Yomogi',cursive;font-size:11px;color:var(--ink);line-height:1.8;}
+
+/* 戻るボタン */
+.back-wrap{padding:20px 24px 0 58px;}
+.back-btn{width:100%;padding:14px;background:var(--paper2);border:2px solid var(--ink2);border-radius:30px;font-family:'Yomogi',cursive;font-size:13px;color:var(--ink);cursor:pointer;transition:all .15s;box-shadow:2px 3px 0 rgba(28,26,20,0.1);}
+.back-btn:hover{background:var(--ink);color:var(--paper);}
+.pad{height:30px;}
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="hd">
+    <div class="hd-eyebrow">SELF STATUS — 自分を知る</div>
+    <div class="hd-memo">だんだん<br>わかってくる</div>
+    <div class="hd-title">自己分析ノート</div>
+    <div class="hd-badge" id="hd-badge">合コン0回目</div>
+  </div>
+
+  <!-- パラメータ比較 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">1</div>
+      <div class="sec-label">自分のパラメータ</div>
+      <div class="sec-line"></div>
+    </div>
+    <div class="param-card" id="param-card"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-bar" style="background:var(--blue)"></div>自己認識（設定した値）</div>
+      <div class="legend-item"><div class="legend-bar" style="background:var(--red)"></div>実際の値（わかった部分）</div>
+      <div class="legend-item"><div class="legend-bar" style="background:var(--paper3);border:1px solid var(--rule2)"></div>まだ不明</div>
+    </div>
+  </div>
+
+  <!-- ヒント -->
+  <div class="sec">
+    <div class="hint-box" id="hint-box" style="display:none">
+      <div class="hint-label">INSIGHT — 今日気づいたこと</div>
+      <div class="hint-text" id="hint-text"></div>
+    </div>
+  </div>
+
+  <!-- 合コン戦績 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">2</div>
+      <div class="sec-label">合コン戦績</div>
+      <div class="sec-line"></div>
+    </div>
+    <div class="record-card">
+      <div class="record-grid" id="record-grid"></div>
+      <div class="locked-box" id="locked-box">
+        <div class="locked-label">🔒 詳細ログ（頭パラメータ60以上で解放）</div>
+        <div class="locked-text" id="locked-text">もっと頭を活かせば、過去の合コンを振り返る余裕が生まれる。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="back-wrap">
+    <button class="back-btn" onclick="history.back()">← 戻る</button>
+  </div>
+  <div class="pad"></div>
+</div>
+
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script src="../data/flags.js"></script>
+<script>
+const CFG    = loadConfig();
+const RESULT = JSON.parse(localStorage.getItem('goukon_result')||'null');
+const self_  = CFG?.self    ||{comm:50,visu:50,head:50,tact:50,air:50,mental:50,sake:50};
+const actual = CFG?.actual  ||{};
+const revealed = CFG?.revealedParams||[];
+const count  = CFG?.goukonCount||0;
+
+const PLABELS={comm:'コミュ力',visu:'ビジュ',head:'頭',tact:'手際',air:'空気読み',mental:'メンタル',sake:'酒の強さ'};
+const GRADE=v=>v>=81?'◎◎':v>=61?'◎':v>=41?'○':v>=21?'△':'×';
+
+document.getElementById('hd-badge').textContent=`合コン${count}回目`;
+
+// パラメータカード
+function renderParams(){
+  const card=document.getElementById('param-card');
+  card.innerHTML='';
+  Object.entries(PLABELS).forEach(([k,label])=>{
+    const selfVal=self_[k]||50;
+    const isRevealed=revealed.includes(k);
+    const actualVal=isRevealed?(actual[k]||selfVal):null;
+    const gap=actualVal!==null?Math.abs(actualVal-selfVal):null;
+    const gapClass=gap===null?'gap-unknown':gap<10?'gap-match':gap<25?'gap-mid':'gap-high';
+    const gapText=gap===null?'？まだ不明':gap<10?'◎ほぼ合ってる':gap<25?'△少しズレあり':'✗かなり違う';
+
+    const row=document.createElement('div');
+    row.className='param-row';
+    row.innerHTML=`
+      <div class="param-name">${label}</div>
+      <div class="param-mid">
+        <div class="param-bars">
+          <div class="param-bar-row">
+            <div class="param-bar-label">自己認識</div>
+            <div class="param-bar-track"><div class="param-bar-fill fill-self" style="width:${selfVal}%"></div></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;width:20px;text-align:right;color:var(--blue)">${selfVal}</div>
+          </div>
+          <div class="param-bar-row">
+            <div class="param-bar-label">実際の値</div>
+            <div class="param-bar-track"><div class="param-bar-fill ${isRevealed?'fill-actual':'fill-unknown'}" style="width:${isRevealed?actualVal:0}%"></div></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;width:20px;text-align:right;color:var(--red)">${isRevealed?actualVal:'?'}</div>
+          </div>
+        </div>
+        <div><span class="gap-badge ${gapClass}">${gapText}</span></div>
+      </div>
+      <div class="param-grade ${isRevealed?'known':'unknown'}">${isRevealed?GRADE(actualVal):'？'}</div>`;
+    card.appendChild(row);
+  });
+}
+
+// 戦績
+function renderRecord(){
+  const grid=document.getElementById('record-grid');
+  const money=CFG?.money||0;
+  const maxHeart=RESULT?Math.max(...Object.values(RESULT.heroineStatus||{}).map(h=>h.heart||0)):0;
+
+  grid.innerHTML=`
+    <div class="record-item"><div class="record-val red">${count}</div><div class="record-label">合コン回数</div></div>
+    <div class="record-item"><div class="record-val blue">¥${money.toLocaleString()}</div><div class="record-label">所持金</div></div>
+    <div class="record-item"><div class="record-val">${maxHeart||'—'}</div><div class="record-label">最高好感度</div></div>
+    <div class="record-item"><div class="record-val">${CFG?.year||1}年${CFG?.month||4}月</div><div class="record-label">現在時期</div></div>`;
+
+  // 頭が高いと詳細ログ解放
+  const head=self_.head||0;
+  const lb=document.getElementById('locked-box');
+  const lt=document.getElementById('locked-text');
+  if(head>=60){
+    lb.style.borderColor='var(--ok)';
+    lb.style.background='rgba(46,125,66,.05)';
+    lt.innerHTML=`<span style="color:var(--ok);font-family:'IBM Plex Mono',monospace;font-size:8px">✓ 解放済み</span><br>
+      前回の合コンで一番好感度が上がったのは${RESULT?'結果画面の女性':'不明'}。<br>
+      場の空気が高い時の方がコマンドの効果が大きかった。<br>
+      友達に任せると空気は上がりやすいが自分の存在感が薄れる傾向がある。`;
+    document.querySelector('.locked-label').textContent='📋 詳細ログ（解放済み）';
+  }
+}
+
+// ヒント（直近の乖離から）
+function renderHint(){
+  const box=document.getElementById('hint-box');
+  const txt=document.getElementById('hint-text');
+  if(!actual||!Object.keys(actual).length) return;
+
+  const params=Object.keys(PLABELS);
+  const gaps=params.map(k=>({k,gap:actual[k]-(self_[k]||50)})).sort((a,b)=>Math.abs(b.gap)-Math.abs(a.gap));
+  const top=gaps[0];
+  if(Math.abs(top.gap)<5) return;
+
+  const label=PLABELS[top.k];
+  let text='';
+  if(top.gap>15) text=`${label}、実は自分が思ってたより高いかもしれない。\n合コンでの反応が思ったよりよかった気がする。`;
+  else if(top.gap<-15) text=`${label}、思ってたより苦手だったかもしれない。\n合コンでの手応えと比べると少し違う感じがした。`;
+  else if(top.gap>8) text=`${label}について、なんとなくいける気がしてきた。`;
+  else text=`${label}、もう少し合コンを重ねるとはっきりしてくるかも。`;
+
+  txt.textContent=text;
+  box.style.display='block';
+}
+
+renderParams();
+renderRecord();
+renderHint();
+</script>
+</body>
+</html>

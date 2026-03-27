@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.title-wrap { padding: 60px 24px 0; position: relative; }
+.title-wrap::before {
+  content: '';
+  position: absolute;
+  left: 58px; top: 0; bottom: -40px;
+  width: 1.5px;
+  background: rgba(192,57,43,0.3);
+}
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--pencil);
+  margin-left: 48px;
+  margin-bottom: 8px;
+  letter-spacing: .1em;
+}
+.main-title {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: .95;
+  margin-left: 48px;
+  letter-spacing: -.02em;
+  position: relative;
+  display: inline-block;
+}
+.main-title::after {
+  content: '';
+  position: absolute;
+  left: -2px; right: -4px; bottom: -6px;
+  height: 4px; background: var(--ink); border-radius: 1px;
+}
+.main-title::before {
+  content: '';
+  position: absolute;
+  left: -2px; right: -4px; bottom: -12px;
+  height: 1.5px; background: var(--ink); opacity: .3;
+}
+.subtitle {
+  font-family: 'Yomogi', cursive;
+  font-size: 12px;
+  color: var(--pencil);
+  margin: 24px 0 0 48px;
+  line-height: 1.8;
+}
+.memo {
+  position: absolute;
+  top: 60px; right: 20px;
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--blue);
+  transform: rotate(3deg);
+  line-height: 1.6;
+  opacity: .8;
+}
+
+.menu-wrap { padding: 40px 24px 0 58px; display: flex; flex-direction: column; gap: 12px; }
+
+.menu-btn {
+  background: var(--paper);
+  border: 2px solid var(--ink2);
+  border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  box-shadow: 2px 3px 0 rgba(28,26,20,0.12);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.menu-btn:hover { transform: translateY(-1px); box-shadow: 3px 4px 0 rgba(28,26,20,0.18); }
+.menu-btn:active { transform: scale(.98); }
+.menu-btn.primary { background: var(--ink); }
+.menu-btn.primary .menu-btn-title { color: var(--paper); }
+.menu-btn.primary .menu-btn-desc { color: var(--muted); }
+.menu-btn-icon { font-size: 24px; flex-shrink: 0; }
+.menu-btn-body { flex: 1; }
+.menu-btn-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.menu-btn-desc {
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--pencil);
+}
+.menu-btn-arrow { font-size: 16px; color: var(--muted); }
+.menu-btn.primary .menu-btn-arrow { color: var(--paper); }
+
+.version {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 32px;
+  letter-spacing: .2em;
+}
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title-wrap">
+    <div class="memo">合コン攻略の<br>バイブル</div>
+    <div class="eyebrow">UNIVERSITY ROMANCE SIM</div>
+    <div class="main-title">大学生活<br>攻略録</div>
+    <div class="subtitle">
+      時間と金が有限な4年間。<br>
+      誰を合コンに呼ぶか。誰を切るか。<br>
+      だんだん、自分のことがわかってくる。
+    </div>
+  </div>
+
+  <div class="menu-wrap">
+    <button class="menu-btn primary" onclick="location.href='screens/chara_create.html'">
+      <div class="menu-btn-icon">📓</div>
+      <div class="menu-btn-body">
+        <div class="menu-btn-title">はじめから</div>
+        <div class="menu-btn-desc">キャラクター設定からスタート</div>
+      </div>
+      <div class="menu-btn-arrow">→</div>
+    </button>
+    <button class="menu-btn" onclick="loadAndContinue()">
+      <div class="menu-btn-icon">📎</div>
+      <div class="menu-btn-body">
+        <div class="menu-btn-title">つづきから</div>
+        <div class="menu-btn-desc">セーブデータをロード</div>
+      </div>
+      <div class="menu-btn-arrow">→</div>
+    </button>
+    <button class="menu-btn" onclick="location.href='screens/formation.html'">
+      <div class="menu-btn-icon">📋</div>
+      <div class="menu-btn-body">
+        <div class="menu-btn-title">編成画面</div>
+        <div class="menu-btn-desc">合コン布陣を組む</div>
+      </div>
+      <div class="menu-btn-arrow">→</div>
+    </button>
+    <button class="menu-btn" onclick="location.href='screens/friends.html'">
+      <div class="menu-btn-icon">👥</div>
+      <div class="menu-btn-body">
+        <div class="menu-btn-title">友達一覧</div>
+        <div class="menu-btn-desc">14人の仲間を確認する</div>
+      </div>
+      <div class="menu-btn-arrow">→</div>
+    </button>
+    <button class="menu-btn" onclick="location.href='screens/status.html'">
+      <div class="menu-btn-icon">📓</div>
+      <div class="menu-btn-body">
+        <div class="menu-btn-title">自己分析ノート</div>
+        <div class="menu-btn-desc">自分のパラメータを確認する</div>
+      </div>
+      <div class="menu-btn-arrow">→</div>
+    </button>
+  </div>
+
+  <div class="version">v0.1 — prototype / 2026</div>
+</div>
+
+<script src="data/gamedata.js"></script>
+<script>
+function loadAndContinue() {
+  if (GameState.load()) {
+    const summary = GameState.summary;
+    if (confirm(`セーブデータが見つかりました。\n${summary}\nつづきから始めますか？`)) {
+      location.href = 'screens/formation.html';
+    }
+  } else {
+    alert('セーブデータがありません。\nはじめからプレイしてください。');
+  }
+}
+</script>
+</body>
+</html>

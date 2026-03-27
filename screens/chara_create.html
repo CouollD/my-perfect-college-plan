@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:   #f5f0e6;
+  --paper2:  #ede7d8;
+  --paper3:  #e4dcc8;
+  --ink:     #1c1a14;
+  --ink2:    #3a3628;
+  --rule:    rgba(28,26,20,0.10);
+  --rule2:   rgba(28,26,20,0.22);
+  --red:     #c0392b;     /* 朱 — the ONE accent */
+  --red-t:   rgba(192,57,43,0.08);
+  --red-t2:  rgba(192,57,43,0.04);
+  --blue-ink:#2c4a8a;    /* 青ボールペン風 サブアクセント */
+  --pencil:  #7a7060;    /* 鉛筆グレー */
+  --muted:   #9a9080;
+  --ok:      #2e7d42;
+}
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Shippori Mincho B1', serif;
+  min-height: 100vh;
+  /* notebook ruled lines */
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, transparent calc(100% - 1px), rgba(192,57,43,0.15) calc(100% - 1px));
+  background-size: 100% 28px, 100% 100%;
+  background-position: 0 12px, 0 0;
+}
+
+#root { max-width:480px; margin:0 auto; padding-bottom:80px; position:relative; }
+
+/* ── HEADER ── */
+.hd {
+  padding: 32px 24px 0;
+  position: relative;
+}
+
+/* 赤い縦線（ノートのマージン線） */
+.hd::before {
+  content:'';
+  position:absolute;
+  left: 58px;
+  top: 0; bottom: -40px;
+  width: 1.5px;
+  background: rgba(192,57,43,0.3);
+  pointer-events: none;
+}
+
+.hd-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--pencil);
+  margin-bottom: 8px;
+  letter-spacing: .1em;
+  margin-left: 48px;
+}
+
+.hd-title-wrap {
+  margin-left: 48px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* 二重下線 — ノートのタイトル下線 */
+.hd-title {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  position: relative;
+  display: inline-block;
+}
+.hd-title::after {
+  content: '';
+  position: absolute;
+  left: -2px; right: -4px;
+  bottom: -4px;
+  height: 3px;
+  background: var(--ink);
+  border-radius: 1px;
+}
+.hd-title::before {
+  content: '';
+  position: absolute;
+  left: -2px; right: -4px;
+  bottom: -9px;
+  height: 1px;
+  background: var(--ink);
+  opacity: .4;
+}
+
+/* 手書き風の丸囲み文字を模したバッジ */
+.hd-badge {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 3px 12px;
+  border: 2px solid var(--red);
+  border-radius: 20px;
+  font-family: 'Yomogi', cursive;
+  font-size: 11px;
+  color: var(--red);
+  letter-spacing: .05em;
+  transform: rotate(-1deg);
+}
+
+/* 落書き風のメモ */
+.hd-memo {
+  position: absolute;
+  top: 0px;
+  right: 20px;
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--blue-ink);
+  transform: rotate(3deg);
+  line-height: 1.6;
+  opacity: .8;
+}
+.hd-memo::before {
+  content: '← ';
+  color: var(--red);
+}
+
+/* ── PROGRESS ── */
+.progress {
+  margin: 16px 24px 0 72px;
+  display: flex;
+  gap: 0;
+  border: 1.5px solid var(--ink2);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--paper2);
+}
+.prog-item {
+  flex: 1;
+  text-align: center;
+  padding: 7px 4px;
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--muted);
+  border-right: 1px solid var(--rule2);
+  transition: all .2s;
+  position: relative;
+}
+.prog-item:last-child { border-right:none; }
+.prog-item.done { color: var(--ok); }
+.prog-item.done::after { content: ' ✓'; font-size:9px; }
+.prog-item.active {
+  color: var(--ink);
+  background: var(--red-t);
+  font-weight: 700;
+}
+
+/* ── SECTION ── */
+.sec {
+  padding: 24px 24px 0;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.sec.visible { opacity:1; transform:none; }
+
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+  margin-left: 34px;
+  position: relative;
+}
+/* 番号を手書き風丸で囲む */
+.sec-num {
+  width: 22px; height: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  flex-shrink: 0;
+  background: var(--paper);
+  position: relative;
+  top: 1px;
+}
+.sec-label {
+  font-family: 'Yomogi', cursive;
+  font-size: 14px;
+  color: var(--ink);
+}
+.sec-underline {
+  flex: 1;
+  position: relative;
+  top: -1px;
+}
+.sec-underline::after {
+  content:'';
+  display:block;
+  height: 1.5px;
+  background: var(--ink2);
+  border-radius: 1px;
+  opacity: .35;
+}
+
+/* ── OPTION TILES ── */
+.opts { display:flex; flex-direction:column; gap:8px; margin-left:34px; }
+
+.opt {
+  background: var(--paper);
+  /* 手書き風の少し歪んだ枠 — box-shadow で多重ボーダー */
+  border: 2px solid var(--ink2);
+  border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+  padding: 0;
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s, background .12s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  min-height: 72px;
+  /* スタンプ・付箋っぽい影 */
+  box-shadow: 2px 3px 0 rgba(28,26,20,0.12);
+}
+.opt:active { transform: scale(.98) rotate(-.3deg); }
+.opt:hover {
+  box-shadow: 3px 4px 0 rgba(28,26,20,0.18);
+  transform: translateY(-1px);
+}
+.opt.selected {
+  border-color: var(--red);
+  background: var(--red-t2);
+  box-shadow: 3px 4px 0 rgba(192,57,43,0.25);
+  transform: translateY(-1px);
+}
+
+/* チェックマーク（手書き風） */
+.opt-check {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border-right: 1.5px solid var(--rule2);
+  color: var(--rule2);
+  transition: color .15s;
+  font-family: 'Yomogi', cursive;
+}
+.opt.selected .opt-check { color: var(--red); }
+
+.opt-body {
+  flex: 1;
+  padding: 12px 12px;
+  min-width: 0;
+}
+.opt-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  line-height: 1.2;
+}
+.opt.selected .opt-name { color: var(--red); }
+.opt-desc {
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--pencil);
+  line-height: 1.6;
+}
+
+.opt-tags {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 12px 10px 0;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+.fx {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+  letter-spacing: .04em;
+}
+.fx-p { color: var(--ok); }
+.fx-m { color: var(--red); }
+.fx-n { color: var(--pencil); }
+
+/* money */
+.opt-money {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--blue-ink);
+  padding: 0 12px 0 0;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity .2s;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.opt.selected .opt-money { opacity: 1; }
+
+/* ── SELF PERCEPTION ── */
+.sp-notice {
+  margin: 0 24px 16px 58px;
+  padding: 10px 14px;
+  background: rgba(44,74,138,0.06);
+  border-left: 3px solid var(--blue-ink);
+  border-radius: 0 8px 8px 0;
+  font-family: 'Yomogi', cursive;
+  font-size: 11px;
+  color: var(--blue-ink);
+  line-height: 1.8;
+}
+
+.sp-rows { margin-left:34px; border-top: 1.5px solid var(--rule2); }
+
+.sp-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+  min-height: 62px;
+}
+.sp-name {
+  width: 72px;
+  padding: 0 10px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+}
+.sp-mid {
+  flex: 1;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* pip dots — 手書き感のある丸 */
+.sp-pips { display:flex; gap:5px; }
+.sp-pip {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rule2);
+  transition: background .1s, border-color .1s;
+}
+.sp-pip.on { background: var(--pencil); border-color: var(--pencil); }
+.sp-pip.hot { background: var(--red); border-color: var(--red); }
+
+/* slider */
+.sp-track {
+  position: relative;
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+.sp-bg {
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: var(--paper3);
+  border-radius: 2px;
+  border: 1px solid var(--rule2);
+}
+.sp-fill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 1px;
+  transition: width .04s;
+}
+/* サムネを丸く — ポップな感じ */
+.sp-thumb {
+  position: absolute;
+  width: 22px; height: 22px;
+  background: var(--paper);
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  transition: left .04s, border-color .15s;
+  box-shadow: 1px 2px 0 rgba(28,26,20,0.15);
+}
+.sp-row:focus-within .sp-thumb {
+  border-color: var(--red);
+}
+input[type=range] {
+  position: absolute;
+  inset: 0; width:100%; height:100%;
+  opacity:0; cursor:pointer;
+  -webkit-appearance:none; margin:0;
+}
+
+.sp-grade {
+  width: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--pencil);
+  transition: color .15s;
+  border-left: 1px solid var(--rule);
+  align-self: stretch;
+}
+.sp-grade.high { color: var(--red); }
+.sp-grade.low  { color: var(--blue-ink); }
+
+/* ── CONFIRM ── */
+.confirm-wrap { padding: 24px 24px 0 58px; }
+.confirm {
+  border: 2px solid var(--ink2);
+  border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+  background: var(--paper2);
+  overflow: hidden;
+  box-shadow: 3px 4px 0 rgba(28,26,20,0.12);
+}
+.confirm-head {
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--ink2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--ink);
+  color: var(--paper);
+}
+.confirm-head-label {
+  font-family: 'Yomogi', cursive;
+  font-size: 11px;
+  letter-spacing: .1em;
+}
+.confirm-head-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--paper3);
+}
+.confirm-head-status.ready { color: #7dff9a; }
+.confirm-rows { display:flex; flex-direction:column; }
+.confirm-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 11px;
+}
+.confirm-row:last-child { border-bottom:none; }
+.confirm-key {
+  font-family: 'Yomogi', cursive;
+  color: var(--muted);
+}
+.confirm-val { font-weight: 700; color: var(--ink); }
+.confirm-val.empty { color: var(--rule2); font-weight: 400; font-family: 'IBM Plex Mono',monospace; font-size:10px; }
+.confirm-val.money {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--blue-ink);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── START BTN ── */
+.btn-wrap { padding: 20px 24px 20px 58px; }
+.start-btn {
+  width: 100%;
+  background: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 30px;
+  padding: 18px;
+  color: var(--paper);
+  font-family: 'Yomogi', cursive;
+  font-size: 14px;
+  letter-spacing: .15em;
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: 4px 5px 0 rgba(28,26,20,0.2);
+  position: relative;
+}
+.start-btn:not(:disabled):hover {
+  background: var(--red);
+  border-color: var(--red);
+  box-shadow: 5px 6px 0 rgba(192,57,43,0.25);
+  transform: translateY(-1px);
+}
+.start-btn:not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 0 rgba(28,26,20,0.2);
+}
+.start-btn:disabled {
+  background: var(--paper3);
+  border-color: var(--rule2);
+  color: var(--muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes popIn {
+  0%   { opacity:0; transform:translateY(8px) scale(.98); }
+  100% { opacity:1; transform:none; }
+}
+.sec.visible { animation: popIn .3s ease both; }
+</style>
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script src="../data/flags.js"></script>
+</head>
+<body>
+<div id="root">
+
+  <div class="hd">
+    <div class="hd-date" id="hd-date">2025.04.01 — 入学式</div>
+    <div class="hd-memo">ここ大事！</div>
+    <div class="hd-title-wrap">
+      <div class="hd-title">大学生活<br>攻略録</div>
+      <div class="hd-badge">キャラクター設定</div>
+    </div>
+  </div>
+
+  <div class="progress" style="margin-top:20px">
+    <div class="prog-item active" id="pr-1">居住</div>
+    <div class="prog-item" id="pr-2">サークル</div>
+    <div class="prog-item" id="pr-3">バイト</div>
+    <div class="prog-item" id="pr-4">自己認識</div>
+  </div>
+
+  <!-- 01 居住 -->
+  <div class="sec visible" id="sec-living">
+    <div class="sec-head">
+      <div class="sec-num">1</div>
+      <div class="sec-label">どこに住む？</div>
+      <div class="sec-underline"></div>
+    </div>
+    <div class="opts">
+      <div class="opt" data-g="living" data-v="home" data-m="40000" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">実家暮らし</div>
+          <div class="opt-desc">お金の心配は少ない。でも自由がなぁ…</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">金に余裕</span>
+          <span class="fx fx-m">行動制約</span>
+        </div>
+        <div class="opt-money">¥40K</div>
+      </div>
+      <div class="opt" data-g="living" data-v="alone_send" data-m="30000" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">一人暮らし<br>仕送りあり</div>
+          <div class="opt-desc">自由！バイトは気が向いたら。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">自由度高</span>
+          <span class="fx fx-n">バイト任意</span>
+        </div>
+        <div class="opt-money">¥30K</div>
+      </div>
+      <div class="opt" data-g="living" data-v="alone_nosend" data-m="15000" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">一人暮らし<br>仕送りなし</div>
+          <div class="opt-desc">バイト必須。でもその分仲間ができる。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-m">バイト必須</span>
+          <span class="fx fx-p">絆が深まる</span>
+        </div>
+        <div class="opt-money">¥15K</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 サークル -->
+  <div class="sec" id="sec-circle">
+    <div class="sec-head">
+      <div class="sec-num">2</div>
+      <div class="sec-label">サークルどうする？</div>
+      <div class="sec-underline"></div>
+    </div>
+    <div class="opts">
+      <div class="opt" data-g="circle" data-v="none" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">入らない</div>
+          <div class="opt-desc">時間は自分のもの。出会いは別で作る。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">時間に余裕</span>
+          <span class="fx fx-m">出会い限定</span>
+        </div>
+      </div>
+      <div class="opt" data-g="circle" data-v="culture" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">文化系</div>
+          <div class="opt-desc">ブラスバンドとか。ゆっくり仲良くなれる。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">穏やかに深まる</span>
+          <span class="fx fx-n">まったり系</span>
+        </div>
+      </div>
+      <div class="opt" data-g="circle" data-v="sports" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">体育会系</div>
+          <div class="opt-desc">絆は強い。でも合わない人とは合わない。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">絆が強い</span>
+          <span class="fx fx-m">一部と距離</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 バイト -->
+  <div class="sec" id="sec-part">
+    <div class="sec-head">
+      <div class="sec-num">3</div>
+      <div class="sec-label">バイトは？</div>
+      <div class="sec-underline"></div>
+    </div>
+    <div class="opts">
+      <div class="opt" data-g="part" data-v="none" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">しない</div>
+          <div class="opt-desc">時間は余る。財布は寂しい。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">時間に余裕</span>
+          <span class="fx fx-m">金欠気味</span>
+        </div>
+      </div>
+      <div class="opt" data-g="part" data-v="izakaya" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">居酒屋・飲食</div>
+          <div class="opt-desc">仲間ができやすい。年末年始は地獄。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">仲間と深まる</span>
+          <span class="fx fx-m">繁忙期に制約</span>
+        </div>
+      </div>
+      <div class="opt" data-g="part" data-v="cafe" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">カフェ・販売</div>
+          <div class="opt-desc">シフト安定。仲間もできる。無難。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">シフト安定</span>
+          <span class="fx fx-n">金は中程度</span>
+        </div>
+      </div>
+      <div class="opt" data-g="part" data-v="juku" onclick="pick(this)">
+        <div class="opt-check">○</div>
+        <div class="opt-body">
+          <div class="opt-name">塾講師</div>
+          <div class="opt-desc">時給高い。頭いい人と繋がりやすい。</div>
+        </div>
+        <div class="opt-tags">
+          <span class="fx fx-p">時給高</span>
+          <span class="fx fx-n">知的系と繋がる</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 自己認識 -->
+  <div class="sec" id="sec-self">
+    <div class="sec-head">
+      <div class="sec-num">4</div>
+      <div class="sec-label">自分ってどんな人？（自己申告）</div>
+      <div class="sec-underline"></div>
+    </div>
+    <div class="sp-notice">
+      ※ あくまで「自分がそう思ってる」だけです。<br>本当のところは、やってみないとわからない。
+    </div>
+    <div class="sp-rows" style="margin-left:34px">
+      <div class="sp-row">
+        <div class="sp-name">コミュ力</div>
+        <div class="sp-mid">
+          <div class="sp-pips" id="pp-comm"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
+          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-comm" style="width:50%"></div></div><div class="sp-thumb" id="st-comm" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('comm',this.value)"></div>
+        </div>
+        <div class="sp-grade" id="sg-comm">○</div>
+      </div>
+      <div class="sp-row">
+        <div class="sp-name">ビジュ</div>
+        <div class="sp-mid">
+          <div class="sp-pips" id="pp-visu"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
+          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-visu" style="width:50%"></div></div><div class="sp-thumb" id="st-visu" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('visu',this.value)"></div>
+        </div>
+        <div class="sp-grade" id="sg-visu">○</div>
+      </div>
+      <div class="sp-row">
+        <div class="sp-name">頭</div>
+        <div class="sp-mid">
+          <div class="sp-pips" id="pp-head"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
+          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-head" style="width:50%"></div></div><div class="sp-thumb" id="st-head" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('head',this.value)"></div>
+        </div>
+        <div class="sp-grade" id="sg-head">○</div>
+      </div>
+      <div class="sp-row">
+        <div class="sp-name">手際</div>
+        <div class="sp-mid">
+          <div class="sp-pips" id="pp-tact"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
+          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-tact" style="width:50%"></div></div><div class="sp-thumb" id="st-tact" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('tact',this.value)"></div>
+        </div>
+        <div class="sp-grade" id="sg-tact">○</div>
+      </div>
+      <div class="sp-row">
+        <div class="sp-name">空気読み</div>
+        <div class="sp-mid">
+          <div class="sp-pips" id="pp-air"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
+          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-air" style="width:50%"></div></div><div class="sp-thumb" id="st-air" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('air',this.value)"></div>
+        </div>
+        <div class="sp-grade" id="sg-air">○</div>
+      </div>
+      <div class="sp-row">
+        <div class="sp-name">メンタル</div>
+        <div class="sp-mid">
+          <div class="sp-pips" id="pp-mental"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
+          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-mental" style="width:50%"></div></div><div class="sp-thumb" id="st-mental" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('mental',this.value)"></div>
+        </div>
+        <div class="sp-grade" id="sg-mental">○</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM -->
+  <div class="confirm-wrap">
+    <div class="confirm">
+      <div class="confirm-head">
+        <span class="confirm-head-label">📋 設定確認</span>
+        <span class="confirm-head-status" id="cf-status">入力待ち…</span>
+      </div>
+      <div class="confirm-rows">
+        <div class="confirm-row"><span class="confirm-key">住まい</span><span class="confirm-val empty" id="cv-living">—</span></div>
+        <div class="confirm-row"><span class="confirm-key">サークル</span><span class="confirm-val empty" id="cv-circle">—</span></div>
+        <div class="confirm-row"><span class="confirm-key">バイト</span><span class="confirm-val empty" id="cv-part">—</span></div>
+        <div class="confirm-row"><span class="confirm-key">初期資金</span><span class="confirm-val empty" id="cv-money">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="start-btn" id="start-btn" disabled onclick="startGame()">
+      大学生活、はじめる！
+    </button>
+  </div>
+
+</div>
+
+<script>
+const S={living:null,circle:null,part:null};
+const V={comm:50,visu:50,head:50,tact:50,air:50,mental:50};
+// MONEY_MAP は gamedata.js で定義
+const LABEL={
+  living:{home:'実家暮らし',alone_send:'一人暮らし(仕送りあり)',alone_nosend:'一人暮らし(仕送りなし)'},
+  circle:{none:'入らない',culture:'文化系',sports:'体育会系'},
+  part:{none:'しない',izakaya:'居酒屋・飲食',cafe:'カフェ・販売',juku:'塾講師'},
+};
+const GRADE=v=>v>=81?'◎◎':v>=61?'◎':v>=41?'○':v>=21?'△':'×';
+const GCLS=v=>v>=61?'high':v<=20?'low':'';
+const ORDER=['living','circle','part','self'];
+
+function pick(el){
+  const g=el.dataset.g,v=el.dataset.v;
+  document.querySelectorAll(`[data-g="${g}"]`).forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  S[g]=v;
+  const idx=ORDER.indexOf(g);
+  if(idx>=0&&idx<ORDER.length-1){
+    const next=document.getElementById('sec-'+ORDER[idx+1]);
+    if(next){next.classList.add('visible');setTimeout(()=>next.scrollIntoView({behavior:'smooth',block:'nearest'}),80);}
+  }
+  updateProgress();updateConfirm();checkReady();
+  // living変更時は注記を表示
+  if(g==='living'&&v==='alone_nosend'){
+    const note=document.getElementById('part-note');
+    if(!note){
+      const n=document.createElement('div');
+      n.id='part-note';
+      n.style.cssText="font-family:'Yomogi',cursive;font-size:10px;color:var(--red);margin:4px 0 0 34px;";
+      n.textContent='⚠ 仕送りなしはバイト必須です。「しない」は選べません。';
+      const partSec=document.getElementById('sec-part');
+      if(partSec) partSec.querySelector('.sec-head').after(n);
+    }
+  } else if(g==='living'){
+    const note=document.getElementById('part-note');
+    if(note) note.remove();
+  }
+}
+
+function slide(k,raw){
+  const v=parseInt(raw);V[k]=v;
+  document.getElementById('sf-'+k).style.width=v+'%';
+  document.getElementById('st-'+k).style.left=v+'%';
+  const g=document.getElementById('sg-'+k);
+  g.textContent=GRADE(v);g.className='sp-grade '+GCLS(v);
+  const lvl=Math.ceil(v/20);
+  document.querySelectorAll(`#pp-${k} .sp-pip`).forEach((p,i)=>{
+    p.classList.toggle('on',i<lvl);
+    p.classList.toggle('hot',i===lvl-1&&i<5);
+  });
+}
+
+function updateProgress(){
+  let done=0;
+  ['living','circle','part'].forEach((g,i)=>{
+    const el=document.getElementById('pr-'+(i+1));
+    el.className='prog-item';
+    if(S[g]){el.classList.add('done');done++;}
+    else if(done===i){el.classList.add('active');}
+  });
+  const p4=document.getElementById('pr-4');
+  p4.className='prog-item'+(done===3?' active':'');
+}
+
+function updateConfirm(){
+  const set=(id,val,empty)=>{
+    const el=document.getElementById(id);
+    el.textContent=val||'—';
+    el.className='confirm-val'+(empty?' empty':'');
+  };
+  set('cv-living',S.living?LABEL.living[S.living]:null,!S.living);
+  set('cv-circle',S.circle?LABEL.circle[S.circle]:null,!S.circle);
+  set('cv-part',S.part?LABEL.part[S.part]:null,!S.part);
+  const m=document.getElementById('cv-money');
+  m.textContent=S.living?'¥'+MONEY[S.living].toLocaleString():'—';
+  m.className='confirm-val'+(S.living?' money':' empty');
+}
+
+function checkReady(){
+  // 仕送りなしの場合はバイト「しない」を無効化
+  const isNoSend = S.living === 'alone_nosend';
+  const partNoneCard = document.querySelector('[data-g="part"][data-v="none"]');
+  if(partNoneCard){
+    if(isNoSend){
+      partNoneCard.classList.add('disabled');
+      partNoneCard.style.opacity = '.4';
+      partNoneCard.style.pointerEvents = 'none';
+      // もし既に「しない」を選んでいたらリセット
+      if(S.part === 'none'){
+        S.part = null;
+        partNoneCard.classList.remove('selected');
+      }
+    } else {
+      partNoneCard.classList.remove('disabled');
+      partNoneCard.style.opacity = '';
+      partNoneCard.style.pointerEvents = '';
+    }
+  }
+  const ok=S.living&&S.circle&&S.part;
+  document.getElementById('start-btn').disabled=!ok;
+  const s=document.getElementById('cf-status');
+  s.textContent=ok?'準備OK！':isNoSend&&!S.part?'バイト必須です':'入力待ち…';
+  s.className='confirm-head-status'+(ok?' ready':'');
+}
+
+// 今日の日付
+const d=new Date();
+document.getElementById('hd-date').textContent=
+  d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0')+' — 入学式';
+
+function startGame(){
+  const config = createNewConfig(S.living, S.circle, S.part, {...V});
+  saveConfig(config);
+  location.href='formation.html';
+}
+
+updateProgress();updateConfirm();
+</script>
+</body>
+</html>

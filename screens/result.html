@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録 — 結果</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<style>
+body {
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, transparent calc(100% - 1px), rgba(192,57,43,0.15) calc(100% - 1px));
+  background-size: 100% 28px, 100% 100%;
+  background-position: 0 12px, 0 0;
+}
+
+.hd { padding: 32px 24px 0; position: relative; }
+.hd::before {
+  content:''; position:absolute;
+  left:58px; top:0; bottom:-20px;
+  width:1.5px; background:rgba(192,57,43,0.3);
+}
+.hd-eyebrow {
+  font-family:'IBM Plex Mono',monospace; font-size:9px;
+  color:var(--pencil); margin-left:48px; margin-bottom:6px; letter-spacing:.1em;
+}
+.hd-title {
+  font-size:28px; font-weight:800; margin-left:48px;
+  line-height:1.1; position:relative; display:inline-block;
+}
+.hd-title::after {
+  content:''; position:absolute; left:-2px; right:-4px; bottom:-4px;
+  height:3px; background:var(--ink); border-radius:1px;
+}
+
+/* ── メイン結果 ── */
+.result-wrap { padding: 24px 24px 0 58px; }
+.result-card {
+  background: var(--paper);
+  border: 2.5px solid var(--ink);
+  border-radius: 14px 16px 14px 16px / 16px 14px 16px 14px;
+  box-shadow: 4px 5px 0 rgba(28,26,20,0.15);
+  overflow: hidden;
+}
+.result-header {
+  padding: 12px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  text-align: center;
+}
+.result-icon { font-size: 36px; margin-bottom: 4px; }
+.result-title {
+  font-size: 18px; font-weight: 800; line-height: 1.3;
+}
+.result-sub {
+  font-family: 'Yomogi', cursive; font-size: 10px;
+  color: var(--muted); margin-top: 4px;
+}
+.result-body { padding: 16px; }
+.result-msg {
+  font-family: 'Yomogi', cursive; font-size: 13px;
+  line-height: 1.8; color: var(--ink);
+  border-left: 3px solid var(--red);
+  padding-left: 12px; margin-bottom: 16px;
+}
+
+/* ── 好感度結果 ── */
+.hearts-title {
+  font-family: 'Yomogi', cursive; font-size: 10px;
+  color: var(--pencil); margin-bottom: 8px;
+}
+.heart-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.heart-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.heart-name {
+  font-size: 12px; font-weight: 700; width: 80px; flex-shrink: 0;
+}
+.heart-bar-wrap { flex: 1; }
+.heart-bar-track {
+  height: 8px; background: var(--paper3);
+  border-radius: 4px; border: 1px solid var(--rule2);
+  overflow: hidden; margin-bottom: 2px;
+}
+.heart-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: var(--red); transition: width .8s ease;
+}
+.heart-val {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  color: var(--pencil);
+}
+.heart-change {
+  font-family: 'Yomogi', cursive; font-size: 10px;
+  flex-shrink: 0; min-width: 36px; text-align: right;
+}
+.heart-change.up { color: var(--ok); }
+.heart-change.down { color: var(--red); }
+
+/* ── 自己認識ヒント ── */
+.hint-box {
+  background: rgba(44,74,138,0.06);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+.hint-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 8px;
+  color: var(--blue); letter-spacing: .1em; margin-bottom: 6px;
+}
+.hint-text {
+  font-family: 'Yomogi', cursive; font-size: 11px;
+  color: var(--ink); line-height: 1.7;
+}
+.hint-param {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 6px; padding: 3px 10px;
+  border: 1.5px solid var(--blue); border-radius: 12px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  color: var(--blue);
+}
+
+/* ── 月次情報 ── */
+.month-info {
+  display: flex; gap: 8px;
+  padding-top: 12px; border-top: 1px solid var(--rule);
+}
+.month-cell {
+  flex: 1; text-align: center; padding: 8px 4px;
+  background: var(--paper2); border-radius: 8px;
+  border: 1px solid var(--rule2);
+}
+.month-cell-label {
+  font-family: 'Yomogi', cursive; font-size: 9px;
+  color: var(--pencil); margin-bottom: 4px;
+}
+.month-cell-val {
+  font-size: 14px; font-weight: 800; color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.month-cell-val.money { color: var(--blue); }
+.month-cell-val.red { color: var(--red); }
+
+/* ── アクションボタン ── */
+.actions { padding: 20px 24px 0 58px; display: flex; flex-direction: column; gap: 10px; }
+.action-btn {
+  width: 100%; padding: 16px;
+  border: 2px solid var(--ink2);
+  border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+  background: var(--paper); cursor: pointer;
+  font-family: 'Yomogi', cursive; font-size: 13px;
+  color: var(--ink); text-align: left;
+  box-shadow: 2px 3px 0 rgba(28,26,20,0.1);
+  transition: all .15s;
+  display: flex; align-items: center; gap: 12px;
+}
+.action-btn:hover { transform: translateY(-1px); box-shadow: 3px 4px 0 rgba(28,26,20,0.16); }
+.action-btn:active { transform: scale(.98); }
+.action-btn.primary {
+  background: var(--ink); color: var(--paper);
+  border-color: var(--ink);
+}
+.action-btn.primary:hover { background: var(--red); border-color: var(--red); }
+.action-icon { font-size: 20px; flex-shrink: 0; }
+.action-body { flex: 1; }
+.action-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.action-desc { font-size: 10px; opacity: .7; }
+.action-arrow { font-size: 14px; opacity: .5; }
+</style>
+</head>
+<body>
+<div id="root">
+
+  <div class="hd">
+    <div class="hd-eyebrow" id="hd-eyebrow">RESULT — 合コン結果</div>
+    <div class="hd-title" id="hd-title">今夜の記録</div>
+  </div>
+
+  <div class="result-wrap">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-icon" id="result-icon">🎉</div>
+        <div class="result-title" id="result-title">番号ゲット！</div>
+        <div class="result-sub" id="result-sub"></div>
+      </div>
+      <div class="result-body">
+        <div class="result-msg" id="result-msg"></div>
+
+        <div class="hearts-title">← 今夜の好感度</div>
+        <div class="heart-rows" id="heart-rows"></div>
+
+        <div class="hint-box" id="hint-box">
+          <div class="hint-label">SELF INSIGHT — 自己認識のヒント</div>
+          <div class="hint-text" id="hint-text"></div>
+          <div id="hint-param"></div>
+        </div>
+
+        <div class="month-info">
+          <div class="month-cell">
+            <div class="month-cell-label">合コン回数</div>
+            <div class="month-cell-val red" id="info-count">1回目</div>
+          </div>
+          <div class="month-cell">
+            <div class="month-cell-label">残り時間</div>
+            <div class="month-cell-val" id="info-time">8</div>
+          </div>
+          <div class="month-cell">
+            <div class="month-cell-label">所持金</div>
+            <div class="month-cell-val money" id="info-money">¥28,000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="action-btn primary" onclick="nextGoukon()">
+      <div class="action-icon">🍺</div>
+      <div class="action-body">
+        <div class="action-title">次の合コンへ</div>
+        <div class="action-desc">メンバーを組み直して再挑戦</div>
+      </div>
+      <div class="action-arrow">→</div>
+    </button>
+    <button class="action-btn" onclick="location.href='../index.html'">
+      <div class="action-icon">📓</div>
+      <div class="action-body">
+        <div class="action-title">タイトルに戻る</div>
+        <div class="action-desc">セーブはされています</div>
+      </div>
+      <div class="action-arrow">→</div>
+    </button>
+  </div>
+
+</div>
+
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script src="../data/flags.js"></script>
+<script>
+// ── データ受け取り ──
+const savedResult  = JSON.parse(localStorage.getItem('goukon_result')  || 'null');
+const savedConfig  = JSON.parse(localStorage.getItem('goukon_config')  || 'null');
+const savedParty   = JSON.parse(localStorage.getItem('goukon_party')   || '[1,3,12]');
+const heroineStatus = savedResult?.heroineStatus || { 101:{heart:35}, 102:{heart:50}, 103:{heart:25} };
+const heroineIds   = Object.keys(heroineStatus).map(Number);
+
+// ── 結果判定 ──
+function calcResult() {
+  const entries = Object.entries(heroineStatus).sort((a,b)=>b[1].heart-a[1].heart);
+  const topId   = parseInt(entries[0][0]);
+  const topHero = HEROINES.find(h=>h.id===topId);
+  const heart   = entries[0][1].heart;
+
+  let icon, title, sub, msg;
+  if (heart >= 70) {
+    icon='💌'; title=`${topHero?.name.split(' ')[1]}と連絡先交換！`;
+    sub='大成功！'; msg=`${topHero?.name}が帰り際にそっと連絡先を渡してきた。\n今夜は最高だった。`;
+  } else if (heart >= 50) {
+    icon='😊'; title=`${topHero?.name.split(' ')[1]}といい感じ`;
+    sub='まあまあ'; msg=`${topHero?.name}とは話が弾んだ。\nまだ連絡先は聞けてないが、次に繋げられそうだ。`;
+  } else if (heart >= 35) {
+    icon='😐'; title='悪くはなかった';
+    sub='普通'; msg='特に印象に残ることはなかった。\n次回は布陣を見直してみよう。';
+  } else {
+    icon='😮‍💨'; title='今夜は縁がなかった';
+    sub='玉砕'; msg='うまくいかなかった。\nでも場数を踏めた。次に活かそう。';
+  }
+  return { icon, title, sub, msg, topHero, heart };
+}
+
+// ── 自己認識ヒント生成 ──
+function genHint() {
+  const config = savedConfig;
+  if (!config?.self || !config?.actual) {
+    return { text:'合コンを重ねるほど、自分のことがわかってくる。', param: null };
+  }
+  const self   = config.self;
+  const actual = config.actual;
+  const params = ['comm','visu','head','tact','air','mental','sake'];
+  const labels = { comm:'コミュ力', visu:'ビジュ', head:'頭', tact:'手際', air:'空気読み', mental:'メンタル', sake:'酒の強さ' };
+
+  // 乖離が大きいパラメータを1つ選ぶ
+  const gaps = params.map(k => ({ k, gap: actual[k] - self[k] }));
+  gaps.sort((a,b) => Math.abs(b.gap) - Math.abs(a.gap));
+  const top = gaps[0];
+
+  let text = '';
+  if (Math.abs(top.gap) < 10) {
+    text = '今夜の感触、思ったより自分のイメージ通りだったかもしれない。';
+    return { text, param: null };
+  }
+  if (top.gap > 15) {
+    text = `今夜の反応を見てると、${labels[top.k]}は自分が思ってたより高いかもしれない。`;
+  } else if (top.gap < -15) {
+    text = `${labels[top.k]}、思ったより苦手だったかな…。場面を見返してみよう。`;
+  } else {
+    text = `${labels[top.k]}について、今夜少しずつ見えてきたものがある。`;
+  }
+  const grade = top.gap > 0 ? '↑ 実際は高いかも' : '↓ 実際は低いかも';
+  return { text, param: `${labels[top.k]}　${grade}` };
+}
+
+// ── レンダリング ──
+function render() {
+  const res = calcResult();
+  document.getElementById('result-icon').textContent  = res.icon;
+  document.getElementById('result-title').textContent = res.title;
+  document.getElementById('result-sub').textContent   = res.sub;
+  document.getElementById('result-msg').textContent   = res.msg;
+
+  // 好感度バー
+  const rows = document.getElementById('heart-rows');
+  rows.innerHTML = '';
+  heroineIds.forEach(id => {
+    const h    = HEROINES.find(x=>x.id===id);
+    const s    = heroineStatus[id];
+    const prev = s.heartPrev ?? Math.max(0, s.heart - Math.floor(Math.random()*15+5));
+    const diff = s.heart - prev;
+    const row  = document.createElement('div');
+    row.className = 'heart-row';
+    row.innerHTML = `
+      <div class="heart-name">${h?.name.split(' ')[1] ?? id}</div>
+      <div class="heart-bar-wrap">
+        <div class="heart-bar-track">
+          <div class="heart-bar-fill" style="width:0%" data-target="${s.heart}"></div>
+        </div>
+        <div class="heart-val">${h?.type?.split('・')[0] ?? ''}</div>
+      </div>
+      <div class="heart-change ${diff>=0?'up':'down'}">${diff>=0?'+':''}${diff}</div>`;
+    rows.appendChild(row);
+  });
+
+  // バーをアニメーション
+  setTimeout(() => {
+    document.querySelectorAll('.heart-bar-fill').forEach(el => {
+      el.style.width = el.dataset.target + '%';
+    });
+  }, 100);
+
+  // ヒント
+  const hint = genHint();
+  document.getElementById('hint-text').textContent = hint.text;
+  if (hint.param) {
+    document.getElementById('hint-param').innerHTML =
+      `<div class="hint-param">${hint.param}</div>`;
+  }
+
+  // 月次情報
+  const config = savedConfig;
+  const count  = (config?.goukonCount ?? 0) + 1;
+  const money  = (config?.money ?? 30000) - 5000; // 合コン費用（交通費込み）
+  document.getElementById('info-count').textContent = `${count}回目`;
+  document.getElementById('info-time').textContent  = config?.time ?? '8';
+  document.getElementById('info-money').textContent = '¥' + Math.max(0, money).toLocaleString();
+
+  // GameStateで合コン結果を保存
+  if (GameState.load()) {
+    // 女性ごとの結果をまとめてfinishGoukonに渡す
+    const heroineResults = {};
+    Object.entries(heroineStatus).forEach(([hid, hs]) => {
+      heroineResults[parseInt(hid)] = {
+        heartGained: (hs.heart || 0) - (hs.heartPrev || 0),
+        contact: false, // 連絡先は合コン中に別途setContactで保存済み
+      };
+    });
+    GameState.finishGoukon(heroineResults);
+  }
+}
+
+function nextGoukon() {
+  location.href = 'formation.html';
+}
+
+render();
+</script>
+</body>
+</html>

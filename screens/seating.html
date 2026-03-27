@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>大学生活攻略録 — 座席配置</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<style>
+body{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,transparent calc(100% - 1px),rgba(192,57,43,0.15) calc(100% - 1px));background-size:100% 28px,100% 100%;background-position:0 12px,0 0;}
+.hd{padding:28px 24px 0;position:relative;}
+.hd::before{content:'';position:absolute;left:58px;top:0;bottom:-20px;width:1.5px;background:rgba(192,57,43,0.3);}
+.hd-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--pencil);margin-left:48px;margin-bottom:6px;letter-spacing:.1em;}
+.hd-title{font-size:24px;font-weight:800;margin-left:48px;line-height:1.1;position:relative;display:inline-block;}
+.hd-title::after{content:'';position:absolute;left:-2px;right:-4px;bottom:-4px;height:3px;background:var(--ink);border-radius:1px;}
+.hd-badge{display:inline-block;margin:10px 0 0 48px;padding:3px 12px;border:2px solid var(--red);border-radius:20px;font-family:'Yomogi',cursive;font-size:10px;color:var(--red);transform:rotate(-1deg);}
+.hd-memo{position:absolute;top:28px;right:20px;font-family:'Yomogi',cursive;font-size:10px;color:var(--blue);transform:rotate(2deg);line-height:1.6;opacity:.8;}
+
+/* テーブル図 */
+.table-wrap{padding:20px 24px 0 58px;}
+.table-label{font-family:'Yomogi',cursive;font-size:11px;color:var(--pencil);margin-bottom:12px;}
+.table-diagram{background:var(--paper2);border:2px solid var(--ink2);border-radius:14px;padding:16px;box-shadow:2px 3px 0 rgba(28,26,20,0.1);}
+
+/* 座席グリッド */
+.seats-row{display:flex;gap:8px;justify-content:center;margin-bottom:8px;}
+.seat{
+  flex:1;max-width:120px;
+  background:var(--paper);border:2px solid var(--rule2);
+  border-radius:10px;padding:10px 6px;text-align:center;
+  cursor:pointer;transition:all .15s;position:relative;
+  min-height:72px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;
+}
+.seat:hover{border-color:var(--ink2);transform:translateY(-1px);}
+.seat.occupied{border-color:var(--ink);background:var(--paper);}
+.seat.self{border-color:var(--red);background:var(--red-t2);}
+.seat.heroine-seat{border-color:var(--blue);background:rgba(44,74,138,0.05);cursor:default;}
+.seat.heroine-seat.revealed{background:rgba(44,74,138,0.08);}
+.seat-label{font-family:'Yomogi',cursive;font-size:9px;color:var(--muted);}
+.seat-name{font-size:12px;font-weight:700;color:var(--ink);}
+.seat-type{font-family:'Yomogi',cursive;font-size:8px;color:var(--pencil);}
+.seat-bonus{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--ok);}
+
+/* テーブル中央 */
+.table-center{
+  background:var(--paper3);border:1.5px solid var(--rule2);
+  border-radius:8px;padding:6px;text-align:center;margin:6px 0;
+}
+.table-center-label{font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);}
+
+/* 凡例 */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.legend-item{display:flex;align-items:center;gap:4px;font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ドラッグパネル（男性選択） */
+.men-panel{padding:16px 24px 0 58px;}
+.men-label{font-family:'Yomogi',cursive;font-size:11px;color:var(--pencil);margin-bottom:10px;}
+.men-cards{display:flex;gap:8px;}
+.man-card{
+  flex:1;background:var(--paper);border:2px solid var(--ink2);
+  border-radius:10px;padding:10px 8px;text-align:center;
+  cursor:pointer;transition:all .15s;
+  box-shadow:2px 2px 0 rgba(28,26,20,0.08);
+}
+.man-card:hover{transform:translateY(-1px);box-shadow:3px 3px 0 rgba(28,26,20,0.14);}
+.man-card.placed{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.man-card-name{font-size:11px;font-weight:700;margin-bottom:3px;}
+.man-card-trait{font-family:'Yomogi',cursive;font-size:8px;color:var(--pencil);}
+
+/* 効果説明 */
+.effect-box{
+  margin:16px 24px 0 58px;
+  background:rgba(44,74,138,0.06);border-left:3px solid var(--blue);
+  border-radius:0 8px 8px 0;padding:10px 14px;
+}
+.effect-label{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--blue);letter-spacing:.1em;margin-bottom:6px;}
+.effect-text{font-family:'Yomogi',cursive;font-size:11px;color:var(--ink);line-height:1.7;}
+
+/* 確定ボタン */
+.btn-wrap{padding:20px 24px 0 58px;}
+.start-btn{width:100%;background:var(--ink);border:2.5px solid var(--ink);border-radius:30px;padding:16px;color:var(--paper);font-family:'Yomogi',cursive;font-size:14px;letter-spacing:.1em;cursor:pointer;transition:all .15s;box-shadow:4px 5px 0 rgba(28,26,20,0.2);}
+.start-btn:not(:disabled):hover{background:var(--red);border-color:var(--red);transform:translateY(-1px);}
+.start-btn:disabled{background:var(--paper3);border-color:var(--rule2);color:var(--muted);cursor:not-allowed;box-shadow:none;}
+</style>
+</head>
+<body>
+<div id="root">
+
+  <div class="hd">
+    <div class="hd-eyebrow">SEATING — 座席配置</div>
+    <div class="hd-memo">隣は大事！</div>
+    <div class="hd-title">どこに座る？</div>
+    <div class="hd-badge">合コン前の準備</div>
+  </div>
+
+  <!-- テーブル図 -->
+  <div class="table-wrap">
+    <div class="table-label">← 座席をドラッグして決めよう（タップで移動）</div>
+    <div class="table-diagram">
+
+      <!-- 女性側 -->
+      <div class="seats-row" id="seats-women">
+        <div class="seat heroine-seat" id="ws-0">
+          <div class="seat-label">女性側</div>
+          <div class="seat-name" id="wn-0">？？？</div>
+          <div class="seat-type" id="wt-0"></div>
+        </div>
+        <div class="seat heroine-seat" id="ws-1">
+          <div class="seat-label">女性側</div>
+          <div class="seat-name" id="wn-1">？？？</div>
+          <div class="seat-type" id="wt-1"></div>
+        </div>
+        <div class="seat heroine-seat" id="ws-2">
+          <div class="seat-label">女性側</div>
+          <div class="seat-name" id="wn-2">？？？</div>
+          <div class="seat-type" id="wt-2"></div>
+        </div>
+      </div>
+
+      <!-- テーブル中央 -->
+      <div class="table-center">
+        <div class="table-center-label">🍺 テーブル 🍺</div>
+      </div>
+
+      <!-- 男性側 -->
+      <div class="seats-row" id="seats-men">
+        <div class="seat" id="ms-0" onclick="seatClick(0)">
+          <div class="seat-label">男性側</div>
+          <div class="seat-name" id="mn-0">空き</div>
+          <div class="seat-bonus" id="mb-0"></div>
+        </div>
+        <div class="seat" id="ms-1" onclick="seatClick(1)">
+          <div class="seat-label">男性側</div>
+          <div class="seat-name" id="mn-1">空き</div>
+          <div class="seat-bonus" id="mb-1"></div>
+        </div>
+        <div class="seat" id="ms-2" onclick="seatClick(2)">
+          <div class="seat-label">男性側</div>
+          <div class="seat-name" id="mn-2">空き</div>
+          <div class="seat-bonus" id="mb-2"></div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>自分（赤）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--ink)"></div>友達</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>相手女性</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 男性カード（選択中） -->
+  <div class="men-panel">
+    <div class="men-label">← タップして座席に配置</div>
+    <div class="men-cards" id="men-cards"></div>
+  </div>
+
+  <!-- 効果説明 -->
+  <div class="effect-box">
+    <div class="effect-label">SEAT EFFECT — 座席の効果</div>
+    <div class="effect-text" id="effect-text">
+      隣の女性 → 好感度ボーナスが毎ターン+3<br>
+      正面の女性 → 話しかけるコマンドが選びやすい<br>
+      対角の女性 → 遠いが目が合いやすい（ミステリアス効果）
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button class="start-btn" id="start-btn" disabled onclick="startGoukon()">
+      座席確定 → 合コンスタート！
+    </button>
+  </div>
+
+</div>
+
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script src="../data/flags.js"></script>
+<script>
+const savedParty    = JSON.parse(localStorage.getItem('goukon_party')   ||'[1,3]');
+const savedHeroines = JSON.parse(localStorage.getItem('goukon_heroines')||'[101,102,103]');
+
+// 座席状態: menSeats[0,1,2] = 'self' | friendId | null
+const menSeats    = [null, null, null];
+let selectedMan   = 'self'; // 今選択中のキャラ（'self' or friendId）
+
+const SELF_NAME   = '自分';
+const MEN_OPTIONS = ['self', ...savedParty]; // 自分 + 友達2人
+
+function init(){
+  // 女性の名前を表示（合コン開始前は名前だけ見える）
+  savedHeroines.forEach((id,i)=>{
+    const h = HEROINES.find(x=>x.id===id);
+    if(!h) return;
+    document.getElementById('wn-'+i).textContent = h.name.split(' ')[1];
+    document.getElementById('wt-'+i).textContent = h.type?.split('・')[0]||'';
+  });
+  renderMenCards();
+  renderSeats();
+}
+
+function renderMenCards(){
+  const wrap = document.getElementById('men-cards');
+  wrap.innerHTML = '';
+  MEN_OPTIONS.forEach(opt=>{
+    const isPlaced = menSeats.includes(opt);
+    const name     = opt==='self' ? SELF_NAME : CHARACTERS.find(c=>c.id===opt)?.name.split(' ')[1]||'?';
+    const traits   = opt==='self' ? ['主人公'] : (CHARACTERS.find(c=>c.id===opt)?.traits||[]);
+    const div      = document.createElement('div');
+    div.className  = 'man-card'+(isPlaced?' placed':'')+(selectedMan===opt?' selected':'');
+    div.style.borderColor = selectedMan===opt ? 'var(--red)' : (opt==='self'?'var(--red)':'');
+    div.innerHTML  = `
+      <div class="man-card-name">${name}</div>
+      <div class="man-card-trait">${traits.slice(0,2).join('・')||'—'}</div>`;
+    if(!isPlaced) div.onclick = ()=>{ selectedMan=opt; renderMenCards(); };
+    wrap.appendChild(div);
+  });
+}
+
+function seatClick(idx){
+  if(!selectedMan) return;
+  // 既にそのキャラが他の席に座っていたら外す
+  const prev = menSeats.indexOf(selectedMan);
+  if(prev !== -1) menSeats[prev] = null;
+  menSeats[idx] = selectedMan;
+  // 次のキャラを自動選択
+  const next = MEN_OPTIONS.find(o=>!menSeats.includes(o));
+  selectedMan = next || null;
+  renderSeats();
+  renderMenCards();
+  checkReady();
+  updateEffectText();
+}
+
+function renderSeats(){
+  menSeats.forEach((occ,i)=>{
+    const seat  = document.getElementById('ms-'+i);
+    const nameEl= document.getElementById('mn-'+i);
+    const bonEl = document.getElementById('mb-'+i);
+    if(!occ){
+      seat.className='seat'; nameEl.textContent='空き'; bonEl.textContent='';
+    } else {
+      const isSelf = occ==='self';
+      const name   = isSelf ? SELF_NAME : CHARACTERS.find(c=>c.id===occ)?.name.split(' ')[1]||'?';
+      seat.className = 'seat occupied'+(isSelf?' self':'');
+      nameEl.textContent = name;
+      // 隣の女性との相性を計算して表示
+      const leftH  = i > 0 ? savedHeroines[i-1] : null;
+      const rightH = i < 2 ? savedHeroines[i+1] : null;
+      const bonuses = [];
+      if(leftH)  bonuses.push(`←隣+3`);
+      if(rightH) bonuses.push(`→隣+3`);
+      bonEl.textContent = bonuses.length ? bonuses.join(' ') : '';
+    }
+  });
+}
+
+function updateEffectText(){
+  const selfIdx = menSeats.indexOf('self');
+  if(selfIdx === -1) return;
+  const leftH  = selfIdx > 0 ? HEROINES.find(h=>h.id===savedHeroines[selfIdx-1]) : null;
+  const rightH = selfIdx < 2 ? HEROINES.find(h=>h.id===savedHeroines[selfIdx+1]) : null;
+  const frontH = HEROINES.find(h=>h.id===savedHeroines[selfIdx]);
+  let text = '';
+  if(leftH)  text += `← 左隣：${leftH.name.split(' ')[1]}（毎ターン好感度+3）\n`;
+  if(rightH) text += `→ 右隣：${rightH.name.split(' ')[1]}（毎ターン好感度+3）\n`;
+  if(frontH) text += `↑ 正面：${frontH.name.split(' ')[1]}（話しかけコマンドが選びやすい）`;
+  document.getElementById('effect-text').textContent = text || '座席を決めると効果が表示されます';
+}
+
+function checkReady(){
+  const allPlaced = MEN_OPTIONS.every(o=>menSeats.includes(o));
+  document.getElementById('start-btn').disabled = !allPlaced;
+}
+
+function startGoukon(){
+  // 座席情報を保存
+  const seatingData = {
+    menSeats, // [0,1,2] = 'self' | friendId | null
+    selfSeat: menSeats.indexOf('self'),
+  };
+  localStorage.setItem('goukon_seating', JSON.stringify(seatingData));
+  location.href = 'goukon_day.html';
+}
+
+init();
+</script>
+</body>
+</html>
