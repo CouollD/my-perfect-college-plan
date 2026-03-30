@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>大学生活攻略録</title>
+<title>今夜のスタメン、君に決めた！</title>
 <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <style>
@@ -110,13 +110,12 @@
 <body>
 <div id="root">
   <div class="title-wrap">
-    <div class="memo">合コン攻略の<br>バイブル</div>
-    <div class="eyebrow">UNIVERSITY ROMANCE SIM</div>
-    <div class="main-title">大学生活<br>攻略録</div>
+    <div class="memo">君に<br>決めた！</div>
+    <div class="eyebrow">TONIGHT'S STARTING LINEUP</div>
+    <div class="main-title">今夜の<br>スタメン</div>
     <div class="subtitle">
-      時間と金が有限な4年間。<br>
-      誰を合コンに呼ぶか。誰を切るか。<br>
-      だんだん、自分のことがわかってくる。
+      誰を呼ぶか。誰を切るか。<br>
+      今夜の合コン、布陣が全てを決める。
     </div>
   </div>
 
@@ -137,27 +136,19 @@
       </div>
       <div class="menu-btn-arrow">→</div>
     </button>
-    <button class="menu-btn" onclick="location.href='screens/formation.html'">
-      <div class="menu-btn-icon">📋</div>
-      <div class="menu-btn-body">
-        <div class="menu-btn-title">編成画面</div>
-        <div class="menu-btn-desc">合コン布陣を組む</div>
-      </div>
-      <div class="menu-btn-arrow">→</div>
-    </button>
     <button class="menu-btn" onclick="location.href='screens/friends.html'">
       <div class="menu-btn-icon">👥</div>
       <div class="menu-btn-body">
         <div class="menu-btn-title">友達一覧</div>
-        <div class="menu-btn-desc">14人の仲間を確認する</div>
+        <div class="menu-btn-desc">10人の仲間を確認する</div>
       </div>
       <div class="menu-btn-arrow">→</div>
     </button>
-    <button class="menu-btn" onclick="location.href='screens/status.html'">
-      <div class="menu-btn-icon">📓</div>
+    <button class="menu-btn" onclick="location.href='screens/contacts.html'">
+      <div class="menu-btn-icon">📱</div>
       <div class="menu-btn-body">
-        <div class="menu-btn-title">自己分析ノート</div>
-        <div class="menu-btn-desc">自分のパラメータを確認する</div>
+        <div class="menu-btn-title">連絡先</div>
+        <div class="menu-btn-desc">連絡先を交換した子を確認する</div>
       </div>
       <div class="menu-btn-arrow">→</div>
     </button>
@@ -167,6 +158,7 @@
 </div>
 
 <script src="data/gamedata.js"></script>
+<script src="data/gamestate.js"></script>
 <script>
 function loadAndContinue() {
   if (GameState.load()) {

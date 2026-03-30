@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>連絡先</title>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg:      #f5f0e6;
+  --bg2:     #ede7d8;
+  --ink:     #1c1a14;
+  --ink2:    #3a3628;
+  --muted:   #9a9080;
+  --pencil:  #7a7060;
+  --red:     #c0392b;
+  --blue:    #2c4a8a;
+  --ok:      #2e7d42;
+  --rule:    rgba(28,26,20,0.10);
+  --rule2:   rgba(28,26,20,0.20);
+  /* phone chrome */
+  --phone-top: #1c1a14;
+  --phone-bar: #f8f4ec;
+}
+
+html, body { height: 100%; background: #2a2520; }
+
+/* ── フォンフレーム ── */
+.phone {
+  max-width: 390px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ステータスバー */
+.status-bar {
+  background: var(--phone-top);
+  color: #f5f0e6;
+  padding: 10px 20px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-bar-time { font-weight: 600; letter-spacing: .05em; }
+
+/* ナビバー */
+.nav-bar {
+  background: var(--phone-bar);
+  border-bottom: 1px solid var(--rule2);
+  padding: 12px 20px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  position: relative;
+}
+.nav-back {
+  background: none;
+  border: none;
+  font-family: 'Yomogi', cursive;
+  font-size: 13px;
+  color: var(--blue);
+  cursor: pointer;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-title {
+  font-size: 17px;
+  font-weight: 800;
+  flex: 1;
+  text-align: center;
+  font-family: 'Shippori Mincho B1', serif;
+}
+.nav-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── スクロールコンテンツ ── */
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── 一覧画面 ── */
+#list-screen {}
+
+.contact-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  padding: 12px 20px 6px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg2);
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background .1s;
+  background: var(--bg);
+}
+.contact-row:active { background: var(--bg2); }
+
+.contact-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg2);
+  flex-shrink: 0;
+  border: 1.5px solid var(--rule2);
+}
+.contact-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.contact-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.contact-info { flex: 1; min-width: 0; }
+.contact-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.contact-type {
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--pencil);
+}
+
+.contact-heart {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.heart-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red);
+}
+.heart-bar-wrap {
+  width: 36px;
+  height: 3px;
+  background: var(--rule2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.heart-bar-fill {
+  height: 100%;
+  background: var(--red);
+  border-radius: 2px;
+}
+.contact-arrow {
+  color: var(--muted);
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* 空っぽ */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  text-align: center;
+  gap: 12px;
+}
+.empty-icon { font-size: 52px; }
+.empty-title { font-size: 16px; font-weight: 800; }
+.empty-desc { font-family: 'Yomogi', cursive; font-size: 11px; color: var(--pencil); line-height: 1.9; }
+
+/* ── 詳細画面 ── */
+#detail-screen {
+  display: none;
+  flex-direction: column;
+}
+#detail-screen.open { display: flex; }
+
+.detail-hero {
+  width: 100%;
+  height: 240px;
+  background: var(--bg2);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.detail-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.detail-hero-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  background: linear-gradient(to bottom, var(--bg2), var(--bg3, #ddd));
+}
+.detail-hero-grad {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to top, var(--bg), transparent);
+}
+
+.detail-body { padding: 0 20px 40px; }
+
+.detail-nameblock {
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+.detail-name {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.detail-type {
+  font-family: 'Yomogi', cursive;
+  font-size: 11px;
+  color: var(--pencil);
+}
+
+/* メーター */
+.detail-meters {
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.meter-row { display: flex; align-items: center; gap: 10px; }
+.meter-label {
+  font-family: 'Yomogi', cursive;
+  font-size: 10px;
+  color: var(--pencil);
+  width: 44px;
+  flex-shrink: 0;
+}
+.meter-track {
+  flex: 1;
+  height: 6px;
+  background: #d8d0c0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.meter-fill { height: 100%; border-radius: 3px; transition: width .6s; }
+.fill-romance { background: var(--red); }
+.fill-intimacy { background: var(--blue); }
+.meter-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--ink2);
+  width: 26px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 特性タグ */
+.detail-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.trait {
+  font-family: 'Yomogi', cursive;
+  font-size: 9px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  color: var(--ink2);
+}
+
+/* メモ */
+.detail-memo {
+  background: #fefce8;
+  border-left: 3px solid #c8a030;
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-family: 'Yomogi', cursive;
+  font-size: 11px;
+  color: var(--ink2);
+  line-height: 1.8;
+  margin-bottom: 14px;
+}
+.detail-memo-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: #8a6a00;
+  letter-spacing: .1em;
+  margin-bottom: 4px;
+}
+
+/* 出会い回数 */
+.detail-stat {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-chip {
+  flex: 1;
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.stat-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.stat-label {
+  font-family: 'Yomogi', cursive;
+  font-size: 9px;
+  color: var(--pencil);
+}
+
+/* アニメーション */
+#detail-screen {
+  transform: translateX(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+#detail-screen.open {
+  transform: translateX(0);
+}
+#list-screen {
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+#list-screen.pushed {
+  transform: translateX(-30%);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ステータスバー -->
+  <div class="status-bar">
+    <span class="status-bar-time" id="status-time">9:41</span>
+    <div class="status-icons">
+      <span>●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- ナビバー（一覧用） -->
+  <div class="nav-bar" id="nav-list">
+    <button class="nav-back" onclick="location.href='../index.html'">← ホーム</button>
+    <div class="nav-title">連絡先</div>
+    <div class="nav-count" id="nav-count"></div>
+  </div>
+
+  <!-- ナビバー（詳細用） -->
+  <div class="nav-bar" id="nav-detail" style="display:none;">
+    <button class="nav-back" onclick="closeDetail()">← 連絡先</button>
+    <div class="nav-title" id="nav-detail-name">—</div>
+    <div style="width:48px;"></div>
+  </div>
+
+  <!-- 一覧画面 -->
+  <div class="screen" id="list-screen">
+    <div id="list-area"></div>
+  </div>
+
+  <!-- 詳細画面 -->
+  <div class="screen" id="detail-screen">
+    <div class="detail-hero">
+      <img id="detail-img" src="" alt="" onerror="this.style.display='none'; document.getElementById('detail-img-ph').style.display='flex'">
+      <div class="detail-hero-placeholder" id="detail-img-ph" style="display:none;">👩</div>
+      <div class="detail-hero-grad"></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-nameblock">
+        <div class="detail-name" id="d-name">—</div>
+        <div class="detail-type" id="d-type">—</div>
+      </div>
+
+      <div class="detail-meters">
+        <div class="meter-row">
+          <div class="meter-label">恋愛度</div>
+          <div class="meter-track"><div class="meter-fill fill-romance" id="d-romance-bar" style="width:0%"></div></div>
+          <div class="meter-val" id="d-romance-val">0</div>
+        </div>
+        <div class="meter-row">
+          <div class="meter-label">親密度</div>
+          <div class="meter-track"><div class="meter-fill fill-intimacy" id="d-intimacy-bar" style="width:0%"></div></div>
+          <div class="meter-val" id="d-intimacy-val">0</div>
+        </div>
+      </div>
+
+      <div class="detail-stat">
+        <div class="stat-chip">
+          <div class="stat-val" id="d-met-count">0</div>
+          <div class="stat-label">出会った回数</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-val" id="d-contact-badge">📱</div>
+          <div class="stat-label">連絡先あり</div>
+        </div>
+      </div>
+
+      <div class="detail-traits" id="d-traits"></div>
+
+      <div class="detail-memo" id="d-memo-wrap">
+        <div class="detail-memo-label">MEMO</div>
+        <div id="d-memo"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../data/gamedata.js"></script>
+<script src="../data/gamestate.js"></script>
+<script>
+
+// 時計
+function updateClock() {
+  const now = new Date();
+  document.getElementById('status-time').textContent =
+    now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// データ読み込み
+GameState.load();
+
+const heroines = HEROINES || [];
+const contacts = heroines
+  .filter(h => GameState._data?.heroineRelation?.[h.id]?.contact === true)
+  .sort((a, b) => {
+    const ra = GameState._data?.heroineRelation?.[a.id]?.romance || 0;
+    const rb = GameState._data?.heroineRelation?.[b.id]?.romance || 0;
+    return rb - ra;
+  });
+
+document.getElementById('nav-count').textContent = contacts.length + '人';
+
+// 一覧描画
+function renderList() {
+  const area = document.getElementById('list-area');
+
+  if (contacts.length === 0) {
+    area.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">まだ連絡先がない</div>
+        <div class="empty-desc">合コンで話が盛り上がったら<br>連絡先を交換できるかも。</div>
+      </div>`;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="contact-section-label">CONTACTS — ${contacts.length} 人</div>
+    ${contacts.map(h => {
+      const rel = GameState._data?.heroineRelation?.[h.id] || {};
+      const romance = rel.romance || 0;
+      return `
+      <div class="contact-row" onclick="openDetail(${h.id})">
+        <div class="contact-avatar">
+          <img src="../images/h${h.id}_normal.png" alt="${h.name}"
+               onerror="this.parentNode.innerHTML='<div class=\\'contact-avatar-placeholder\\'>👩</div>'">
+        </div>
+        <div class="contact-info">
+          <div class="contact-name">${h.name}</div>
+          <div class="contact-type">${h.type}</div>
+        </div>
+        <div class="contact-heart">
+          <div class="heart-val">♥ ${romance}</div>
+          <div class="heart-bar-wrap">
+            <div class="heart-bar-fill" style="width:${romance}%"></div>
+          </div>
+        </div>
+        <div class="contact-arrow">›</div>
+      </div>`;
+    }).join('')}`;
+}
+
+// 詳細を開く
+function openDetail(hid) {
+  const h = heroines.find(x => x.id === hid);
+  if (!h) return;
+  const rel = GameState._data?.heroineRelation?.[h.id] || {};
+  const romance  = rel.romance  || 0;
+  const intimacy = rel.intimacy || 0;
+
+  // 画像
+  const img = document.getElementById('detail-img');
+  const ph  = document.getElementById('detail-img-ph');
+  img.style.display = '';
+  ph.style.display  = 'none';
+  img.src = `../images/h${h.id}_normal.png`;
+
+  // テキスト
+  document.getElementById('nav-detail-name').textContent = h.name.split(' ')[1] || h.name;
+  document.getElementById('d-name').textContent    = h.name;
+  document.getElementById('d-type').textContent    = h.type;
+  document.getElementById('d-romance-bar').style.width  = romance + '%';
+  document.getElementById('d-romance-val').textContent  = romance;
+  document.getElementById('d-intimacy-bar').style.width = Math.min(100, intimacy) + '%';
+  document.getElementById('d-intimacy-val').textContent = intimacy;
+  document.getElementById('d-met-count').textContent    = intimacy;
+
+  // 特性
+  document.getElementById('d-traits').innerHTML =
+    (h.traits || []).map(t => `<span class="trait">${t}</span>`).join('') +
+    (h.likes  || []).map(t => `<span class="trait" style="border-color:var(--blue);color:var(--blue)">好み: ${t}</span>`).join('');
+
+  // メモ
+  const memo = h.hint_friend || h.note || '';
+  document.getElementById('d-memo').textContent = memo;
+  document.getElementById('d-memo-wrap').style.display = memo ? '' : 'none';
+
+  // アニメーション
+  document.getElementById('list-screen').classList.add('pushed');
+  const detail = document.getElementById('detail-screen');
+  detail.style.display = 'flex';
+  document.getElementById('nav-list').style.display   = 'none';
+  document.getElementById('nav-detail').style.display = 'flex';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => detail.classList.add('open'));
+  });
+}
+
+function closeDetail() {
+  const detail = document.getElementById('detail-screen');
+  detail.classList.remove('open');
+  document.getElementById('list-screen').classList.remove('pushed');
+  setTimeout(() => {
+    detail.style.display = 'none';
+    document.getElementById('nav-list').style.display   = 'flex';
+    document.getElementById('nav-detail').style.display = 'none';
+  }, 260);
+}
+
+renderList();
+</script>
+</body>
+</html>

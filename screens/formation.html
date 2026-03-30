@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>大学生活攻略録 — 合コン編成</title>
+<title>今夜のスタメン — 編成</title>
 <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -460,6 +460,7 @@ body {
 <div id="root">
 
   <div class="hd">
+    <button onclick="history.back()" style="margin-left:48px;margin-bottom:8px;background:none;border:none;font-family:'Yomogi',cursive;font-size:11px;color:var(--pencil);cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;">← もどる</button>
     <div class="hd-eyebrow">GOUKON FORMATION — 合コン編成</div>
     <div class="hd-memo">誰を切る？</div>
     <div class="hd-title">布陣を組め</div>
@@ -468,7 +469,7 @@ body {
 
   <!-- 選択スロット -->
   <div class="slots-wrap">
-    <div class="slots-label">← メンバー（3人まで）</div>
+    <div class="slots-label">← メンバー（2人まで）</div>
     <div class="slots" id="slots">
       <div class="slot" id="slot-0" onclick="removeSlot(0)">
         <div class="slot-num">01</div>
@@ -572,33 +573,43 @@ function renderFriends(){
       { key:'part',   label:'バイト仲間',   members: CHARACTERS.filter(c=>c.group==='part'  &&!c._envLocked&&!c.locked) },
       { key:'old',    label:'幼馴染',       members: CHARACTERS.filter(c=>c.group==='old'   &&!c.locked) },
     ];
+  } else if(currentFilter === 'group_circle'){
+    const cfg_ = loadConfig();
+    const playerCircle = cfg_?.circle || 'none';
+    sectionDefs = [];
+    if(playerCircle === 'sports'){
+      const sports = CHARACTERS.filter(c=>c.group==='circle'&&c.circle==='sports'&&!c.locked&&!c._envLocked);
+      if(sports.length) sectionDefs.push({ key:'sports', label:'体育会系サークル', members: sports });
+    } else if(playerCircle === 'culture'){
+      const culture = CHARACTERS.filter(c=>c.group==='circle'&&c.circle==='culture'&&!c.locked&&!c._envLocked);
+      if(culture.length) sectionDefs.push({ key:'culture', label:'文化系サークル', members: culture });
+    } else {
+      // サークルなし → バイトなどで接点があるサークルメンバーのみ
+      const sports  = CHARACTERS.filter(c=>c.group==='circle'&&c.circle==='sports' &&!c.locked&&!c._envLocked);
+      const culture = CHARACTERS.filter(c=>c.group==='circle'&&c.circle==='culture'&&!c.locked&&!c._envLocked);
+      if(sports.length)  sectionDefs.push({ key:'sports',  label:'体育会系サークル', members: sports });
+      if(culture.length) sectionDefs.push({ key:'culture', label:'文化系サークル',   members: culture });
+    }
   } else if(currentFilter === 'env_class'){
     sectionDefs = [{ key:'class', label:'ゼミ仲間', members: CHARACTERS.filter(c=>c.group==='class') }];
   } else if(currentFilter === 'env_old'){
     sectionDefs = [{ key:'old', label:'幼馴染', members: CHARACTERS.filter(c=>c.group==='old') }];
   } else {
-    // env_circle_sports / env_part_izakaya 等：
-    // 同じサークルのメンバー・同じバイトのメンバーを別セクションで重複表示
+    // env_circle_sports / env_part_izakaya 等：フィルタ値に一致するメンバーのみ表示
     const parts_ = currentFilter.split('_');
-    const envKey = parts_[1]; // 'circle' or 'part' or 'living'
-    const envVal = parts_.slice(2).join('_');
+    const envKey = parts_[1]; // 'circle' or 'part'
+    const envVal = parts_.slice(2).join('_'); // 'sports' / 'izakaya' etc.
 
-    const byCircle = CHARACTERS.filter(c=>!c.locked && c.circle === config_?.circle && config_?.circle !== 'none');
-    const byPart   = CHARACTERS.filter(c=>!c.locked && c.part   === config_?.part   && config_?.part   !== 'none');
-    const classMembers = CHARACTERS.filter(c=>!c.locked && c.group==='class');
-    const oldMembers   = CHARACTERS.filter(c=>!c.locked && c.group==='old');
-
-    sectionDefs = [];
-    if(byCircle.length && config_?.circle !== 'none'){
-      const label = {sports:'体育会系サークル仲間',culture:'文化系サークル仲間'}[config_?.circle]||'サークル仲間';
-      sectionDefs.push({ key:'circle_env', label, members: byCircle });
-    }
-    if(byPart.length && config_?.part !== 'none'){
-      const label = {izakaya:'居酒屋バイト仲間',cafe:'カフェバイト仲間',juku:'塾バイト仲間'}[config_?.part]||'バイト仲間';
-      sectionDefs.push({ key:'part_env', label, members: byPart });
-    }
-    if(classMembers.length) sectionDefs.push({ key:'class', label:'授業・ゼミ仲間', members: classMembers });
-    if(oldMembers.length)   sectionDefs.push({ key:'old',   label:'幼馴染',         members: oldMembers });
+    const filtered = CHARACTERS.filter(c => !c.locked && !c._envLocked && c[envKey] === envVal);
+    const SECTION_LABEL = {
+      'circle_sports':  '体育会系サークル仲間',
+      'circle_culture': '文化系サークル仲間',
+      'part_izakaya':   '居酒屋バイト仲間',
+      'part_cafe':      'カフェバイト仲間',
+      'part_juku':      '塾バイト仲間',
+    };
+    const label = SECTION_LABEL[`${envKey}_${envVal}`] || 'メンバー';
+    sectionDefs = filtered.length ? [{ key: currentFilter, label, members: filtered }] : [];
   }
 
   // セクション描画
@@ -687,9 +698,9 @@ function renderPartyStats(){
   }
   const members = selected.map(id=>CHARACTERS.find(c=>c.id===id));
 
-  // 自分のステータスをlocalStorageから取得
+  // 自分のステータスを環境設定から導出
   const config = loadConfig();
-  const selfParams = config?.self || { comm:50,visu:50,head:50,tact:50,air:50,mental:50,sake:50 };
+  const selfParams = derivePlayerParams(config?.living||'home', config?.circle||'none', config?.part||'none');
   const selfMember = { name:'自分', params: selfParams };
 
   // パーティ = 自分 + 友達3人
@@ -726,10 +737,10 @@ function renderSynergy(){
   const list = document.getElementById('synergy-list');
   if(!wrap||!list) return;
 
-  const heroineIds = JSON.parse(localStorage.getItem('goukon_heroines')||'[101,102,103]');
   const cfg = loadConfig();
-  const result = calcSynergy(selected, heroineIds, cfg);
-  const synergies = result.synergies;
+  // 布陣段階ではヒロイン未確定なのでパーティシナジーのみ表示
+  const result = calcSynergy(selected, [], cfg);
+  const synergies = result.synergies.filter(s => s.type === 'party');
 
   if(!synergies.length){ wrap.style.display='none'; return; }
   wrap.style.display='block';
@@ -790,10 +801,39 @@ function matchesFilter(c, filter){
   return c.group === filter;
 }
 
+function selectHeroines(){
+  const available = [101,102,103,104,105,106,107,108,109];
+
+  // 1. アンカー（起点）をランダムに1人選ぶ
+  const pool = [...available].sort(()=>Math.random()-.5);
+  const anchorId = pool[0];
+  const anchor = HEROINES.find(h=>h.id===anchorId);
+
+  // 2. アンカーと同サークル / 同バイト / 同地元 / 同ゼミ の子
+  const related = available
+    .filter(id=>id!==anchorId)
+    .filter(id=>{
+      const h=HEROINES.find(x=>x.id===id);
+      return (anchor.circle!=='none'   && h.circle===anchor.circle)
+          || (anchor.part!=='none'     && h.part===anchor.part)
+          || (anchor.hometown          && h.hometown===anchor.hometown)
+          || (anchor.zemi              && h.zemi===anchor.zemi);
+    })
+    .sort(()=>Math.random()-.5);
+
+  // 3. 関係なし（補完用）
+  const others = available
+    .filter(id=>id!==anchorId && !related.includes(id))
+    .sort(()=>Math.random()-.5);
+
+  // 4. relatedを優先、足りなければothersで補完して計2人
+  const companions = [...related, ...others].slice(0,2);
+
+  return [anchorId, ...companions];
+}
+
 function confirmFormation(){
-  const availableHeroines = [101,102,103,104,105,106,107,108,109];
-  const shuffled = availableHeroines.sort(()=>Math.random()-.5);
-  const heroineIds = shuffled.slice(0,3);
+  const heroineIds = selectHeroines();
   localStorage.setItem('goukon_party', JSON.stringify(selected));
   localStorage.setItem('goukon_heroines', JSON.stringify(heroineIds));
   location.href = 'seating.html';
@@ -804,29 +844,38 @@ function applyEnvironmentLocks(){
   const config = loadConfig();
   if(!config) return;
 
-  CHARACTERS.forEach(c => {
-    if(c.locked){ c._envLocked = false; return; }
-    // 自分の環境と接点があるかチェック
-    const sameCircle = config.circle !== 'none' && c.circle === config.circle;
-    const samePart   = config.part   !== 'none' && c.part   === config.part;
-    // 幼馴染・ゼミは共通で接点あり（group:'old' or 'class'）
-    const isCommon   = c.group === 'old' || c.group === 'class';
+  const discovered = GameState._data?.discoveredFriends || [];
 
-    c._envLocked = !(sameCircle || samePart || isCommon);
+  CHARACTERS.forEach(c => {
+    // locked:true のキャラは常にロック（紹介システム外）
+    if(c.locked){ c._envLocked = true; return; }
+
+    // discoverable:true = 紹介でのみ解放できるキャラ
+    if(c.discoverable) {
+      c._envLocked = !discovered.includes(c.id);
+      return;
+    }
+
+    // 通常キャラ：環境一致 or 共通接点 or 紹介済み で解放
+    const sameCircle   = config.circle !== 'none' && c.circle === config.circle;
+    const samePart     = config.part   !== 'none' && c.part   === config.part;
+    const isCommon     = c.group === 'old' || c.group === 'class';
+    const isDiscovered = discovered.includes(c.id);
+
+    c._envLocked = !(sameCircle || samePart || isCommon || isDiscovered);
   });
 }
 
 // ── 自分のステータスを表示 ──
 function renderSelfStatus(){
   const config = loadConfig();
-  if(!config?.self) return;
-  const self = config.self;
+  const self = derivePlayerParams(config?.living||'home', config?.circle||'none', config?.part||'none');
   const wrap = document.getElementById('self-status-wrap');
   if(!wrap) return;
   const params = ['comm','visu','head','tact','air','mental'];
   const labels = {comm:'コミュ',visu:'ビジュ',head:'頭',tact:'手際',air:'空気',mental:'心'};
   wrap.innerHTML = `
-    <div style="font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);margin-bottom:6px">← 自分のステータス（自己認識）</div>
+    <div style="font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);margin-bottom:6px">← 自分のステータス</div>
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px">
       ${params.map(p=>`
         <div style="text-align:center">
@@ -851,18 +900,15 @@ function renderFilterTabs(){
 
   const tabs = [{ f:'all', label:'全員' }];
 
-  // 自分が選んだサークル
-  if(config?.circle === 'sports')  tabs.push({ f:'env_circle_sports',  label:'体育会系' });
-  if(config?.circle === 'culture') tabs.push({ f:'env_circle_culture', label:'文化系' });
-
-  // 自分が選んだバイト
+  // 自分が選んだバイト（あるときだけ表示）
   if(config?.part === 'izakaya') tabs.push({ f:'env_part_izakaya', label:'居酒屋仲間' });
   if(config?.part === 'cafe')    tabs.push({ f:'env_part_cafe',    label:'カフェ仲間' });
   if(config?.part === 'juku')    tabs.push({ f:'env_part_juku',    label:'塾仲間' });
 
-  // 共通（幼馴染・ゼミは常に表示）
-  tabs.push({ f:'env_class', label:'ゼミ仲間' });
-  tabs.push({ f:'env_old',   label:'幼馴染' });
+  // 共通（サークル・ゼミ・幼馴染は常に表示）
+  tabs.push({ f:'group_circle', label:'サークル' });
+  tabs.push({ f:'env_class',    label:'ゼミ仲間' });
+  tabs.push({ f:'env_old',      label:'幼馴染' });
 
   wrap.innerHTML = tabs.map(t =>
     `<div class="ftab${t.f==='all'?' active':''}" data-f="${t.f}" onclick="setFilter(this)">${t.label}</div>`

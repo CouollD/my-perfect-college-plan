@@ -3,224 +3,532 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>大学生活攻略録 — 友達一覧</title>
+<title>友達一覧</title>
 <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/base.css">
 <style>
-body{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,transparent calc(100% - 1px),rgba(192,57,43,0.15) calc(100% - 1px));background-size:100% 28px,100% 100%;background-position:0 12px,0 0;}
-.hd{padding:28px 24px 0;position:relative;}
-.hd::before{content:'';position:absolute;left:58px;top:0;bottom:-20px;width:1.5px;background:rgba(192,57,43,0.3);}
-.hd-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--pencil);margin-left:48px;margin-bottom:6px;letter-spacing:.1em;}
-.hd-title{font-size:24px;font-weight:800;margin-left:48px;line-height:1.1;position:relative;display:inline-block;}
-.hd-title::after{content:'';position:absolute;left:-2px;right:-4px;bottom:-4px;height:3px;background:var(--ink);border-radius:1px;}
-.hd-memo{position:absolute;top:28px;right:20px;font-family:'Yomogi',cursive;font-size:10px;color:var(--blue);transform:rotate(2deg);line-height:1.6;opacity:.8;}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg:     #f5f0e6;
+  --bg2:    #ede7d8;
+  --bg3:    #e4dcc8;
+  --ink:    #1c1a14;
+  --ink2:   #3a3628;
+  --muted:  #9a9080;
+  --pencil: #7a7060;
+  --red:    #c0392b;
+  --blue:   #2c4a8a;
+  --ok:     #2e7d42;
+  --gold:   #8a6a00;
+  --rule:   rgba(28,26,20,0.10);
+  --rule2:  rgba(28,26,20,0.20);
+}
+
+html, body { height: 100%; background: #2a2520; }
+
+.phone {
+  max-width: 390px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ステータスバー */
+.status-bar {
+  background: #1c1a14;
+  color: #f5f0e6;
+  padding: 10px 20px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.status-bar-time { font-weight: 600; letter-spacing: .05em; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+
+/* ナビバー */
+.nav-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule2);
+  padding: 12px 20px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.nav-back {
+  background: none; border: none;
+  font-family: 'Yomogi', cursive;
+  font-size: 13px; color: var(--blue);
+  cursor: pointer; padding: 4px 0;
+}
+.nav-title {
+  font-size: 17px; font-weight: 800; flex: 1; text-align: center;
+  font-family: 'Shippori Mincho B1', serif;
+}
+.nav-right { width: 48px; text-align: right; }
 
 /* フィルタータブ */
-.filter-wrap{padding:16px 24px 0 58px;}
-.filter-label{font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);margin-bottom:8px;}
-.filters{display:flex;gap:5px;flex-wrap:wrap;}
-.ftab{padding:4px 10px;border:1.5px solid var(--rule2);border-radius:16px;font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);cursor:pointer;transition:all .15s;background:var(--paper2);}
-.ftab:active{transform:scale(.96);}
-.ftab.active{border-color:var(--ink);color:var(--ink);background:var(--paper);font-weight:700;box-shadow:1px 2px 0 rgba(28,26,20,0.1);}
+.filter-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule2);
+  padding: 8px 16px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.ftab {
+  padding: 4px 14px;
+  border: 1.5px solid var(--rule2);
+  border-radius: 20px;
+  font-family: 'Yomogi', cursive;
+  font-size: 10px; color: var(--pencil);
+  cursor: pointer; white-space: nowrap;
+  background: var(--bg);
+  transition: all .15s;
+}
+.ftab.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+}
 
-/* グループラベル */
-.group-label{font-family:'Yomogi',cursive;font-size:10px;color:var(--pencil);padding:14px 24px 6px 58px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:6px;}
-.group-dot{width:6px;height:6px;border-radius:50%;background:var(--ink2);flex-shrink:0;}
+/* スクリーン */
+.screen { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-/* 友達カード */
-.friend-list{padding:0 24px 0 58px;display:flex;flex-direction:column;gap:8px;margin-top:8px;}
-.fc{background:var(--paper);border:2px solid var(--ink2);border-radius:10px 12px 10px 12px / 12px 10px 12px 10px;padding:12px 14px;cursor:pointer;transition:all .15s;box-shadow:2px 2px 0 rgba(28,26,20,0.08);position:relative;}
-.fc:hover{transform:translateY(-1px);box-shadow:3px 3px 0 rgba(28,26,20,0.13);}
-.fc.locked{opacity:.5;filter:grayscale(.4);}
-.fc.locked:hover{transform:none;box-shadow:2px 2px 0 rgba(28,26,20,0.08);}
-.fc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.fc-name{font-size:14px;font-weight:700;flex:1;}
-.fc-group{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--pencil);padding:2px 7px;border:1px solid var(--rule2);border-radius:8px;background:var(--paper2);white-space:nowrap;}
-.fc-status{font-family:'Yomogi',cursive;font-size:9px;padding:2px 8px;border-radius:8px;}
-.status-close{background:rgba(192,57,43,.08);color:var(--red);border:1px solid var(--red);}
-.status-normal{background:var(--paper2);color:var(--pencil);border:1px solid var(--rule2);}
-.status-good{background:rgba(46,125,66,.08);color:var(--ok);border:1px solid var(--ok);}
-.fc-params{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;}
-.fp{text-align:center;}
-.fp-name{font-family:'IBM Plex Mono',monospace;font-size:6px;color:var(--muted);display:block;margin-bottom:1px;}
-.fp-val{font-size:10px;font-weight:700;display:block;}
-.fc-bars{display:flex;flex-direction:column;gap:3px;}
-.fc-bar-row{display:flex;align-items:center;gap:6px;}
-.fc-bar-label{font-family:'Yomogi',cursive;font-size:8px;color:var(--pencil);width:40px;flex-shrink:0;}
-.fc-bar-track{flex:1;height:3px;background:var(--paper3);border-radius:2px;border:1px solid var(--rule2);overflow:hidden;}
-.fc-bar-fill{height:100%;border-radius:2px;transition:width .5s;}
-.fill-intimacy{background:var(--red);}
-.fill-current{background:var(--ink);}
-.fill-max{background:var(--pencil);opacity:.4;}
-.fc-note{font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);padding-top:6px;border-top:1px solid var(--rule);line-height:1.6;}
-.fc-note.warn{color:var(--red);}
-.fc-traits{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
-.trait{font-family:'Yomogi',cursive;font-size:8px;padding:2px 6px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule2);color:var(--ink2);}
-.trait.danger{background:rgba(192,57,43,.08);color:var(--red);border-color:var(--red);}
-.trait.good{background:rgba(46,125,66,.08);color:var(--ok);border-color:var(--ok);}
-.lock-badge{position:absolute;top:8px;right:10px;font-family:'Yomogi',cursive;font-size:9px;color:var(--muted);}
+/* ── 一覧 ── */
+.section-header {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: .1em;
+  color: var(--muted);
+  padding: 10px 20px 6px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--rule);
+  text-transform: uppercase;
+}
 
-/* 詳細展開 */
-.fc-detail{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);}
-.fc-detail.open{display:block;}
-.fc-cmd{background:rgba(44,74,138,.06);border-left:2px solid var(--blue);border-radius:0 6px 6px 0;padding:6px 10px;margin-top:6px;}
-.fc-cmd-label{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--blue);margin-bottom:3px;letter-spacing:.1em;}
-.fc-cmd-name{font-size:11px;font-weight:700;margin-bottom:2px;}
-.fc-cmd-desc{font-family:'Yomogi',cursive;font-size:9px;color:var(--pencil);line-height:1.6;}
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  background: var(--bg);
+  transition: background .1s;
+}
+.friend-row:active { background: var(--bg2); }
+.friend-row.locked { opacity: .45; cursor: default; }
 
-/* 戻るボタン */
-.back-wrap{padding:20px 24px 0 58px;}
-.back-btn{width:100%;padding:14px;background:var(--paper2);border:2px solid var(--ink2);border-radius:30px;font-family:'Yomogi',cursive;font-size:13px;color:var(--ink);cursor:pointer;transition:all .15s;box-shadow:2px 3px 0 rgba(28,26,20,0.1);}
-.back-btn:hover{background:var(--ink);color:var(--paper);}
-.pad{height:30px;}
+.friend-icon {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  position: relative;
+}
+.friend-icon-lock {
+  position: absolute; bottom: -2px; right: -2px;
+  font-size: 10px; background: var(--bg); border-radius: 50%;
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.friend-info { flex: 1; min-width: 0; }
+.friend-name {
+  font-size: 14px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.friend-tag {
+  font-family: 'Yomogi', cursive;
+  font-size: 9px; color: var(--pencil);
+}
+
+.friend-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.intimacy-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--blue);
+}
+.intimacy-bar-wrap { width: 36px; height: 3px; background: var(--rule2); border-radius: 2px; overflow: hidden; }
+.intimacy-bar-fill { height: 100%; background: var(--blue); border-radius: 2px; }
+.friend-arrow { color: var(--muted); font-size: 14px; margin-left: 4px; flex-shrink: 0; }
+
+/* ── 詳細 ── */
+#detail-screen {
+  display: none;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+#detail-screen.open { transform: translateX(0); }
+#list-screen { transition: transform .25s cubic-bezier(.4,0,.2,1); }
+#list-screen.pushed { transform: translateX(-30%); pointer-events: none; }
+
+.detail-avatar-wrap {
+  background: var(--bg2);
+  padding: 32px 0 20px;
+  display: flex; flex-direction: column; align-items: center;
+  border-bottom: 1px solid var(--rule2);
+  flex-shrink: 0;
+}
+.detail-avatar-big {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 2px solid var(--rule2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+.detail-dname { font-size: 20px; font-weight: 800; margin-bottom: 3px; }
+.detail-dtype { font-family: 'Yomogi', cursive; font-size: 10px; color: var(--pencil); }
+
+.detail-body { padding: 16px 20px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+/* 親密度メーター */
+.detail-meter-card {
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.detail-meter-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; letter-spacing: .1em;
+  color: var(--muted); margin-bottom: 10px;
+}
+.meter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.meter-row:last-child { margin-bottom: 0; }
+.meter-label { font-family: 'Yomogi', cursive; font-size: 10px; color: var(--pencil); width: 44px; flex-shrink: 0; }
+.meter-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 3px; }
+.fill-intimacy { background: var(--blue); }
+.fill-avg { background: var(--pencil); opacity: .5; }
+.meter-val { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink2); width: 26px; text-align: right; }
+
+/* パラメータグリッド */
+.detail-params {
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.detail-params-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; letter-spacing: .1em;
+  color: var(--muted); margin-bottom: 10px;
+}
+.params-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.param-cell { text-align: center; }
+.param-name { font-family: 'IBM Plex Mono', monospace; font-size: 7px; color: var(--muted); display: block; margin-bottom: 2px; }
+.param-grade { font-size: 13px; font-weight: 700; display: block; }
+.grade-ss { color: var(--red); }
+.grade-s  { color: var(--ink); }
+.grade-a  { color: var(--ink2); }
+.grade-b  { color: var(--pencil); }
+.grade-x  { color: var(--muted); }
+
+/* 特性・注意事項 */
+.detail-traits { display: flex; flex-wrap: wrap; gap: 6px; }
+.trait {
+  font-family: 'Yomogi', cursive;
+  font-size: 9px; padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--bg2);
+  border: 1.5px solid var(--rule2);
+  color: var(--ink2);
+}
+.trait.danger { background: rgba(192,57,43,.08); color: var(--red); border-color: var(--red); }
+.trait.safe   { background: rgba(46,125,66,.08);  color: var(--ok);  border-color: var(--ok); }
+
+.detail-note {
+  font-family: 'Yomogi', cursive;
+  font-size: 11px; color: var(--pencil);
+  line-height: 1.8;
+  background: var(--bg2);
+  border-left: 3px solid var(--rule2);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+}
+.detail-note.warn { border-color: var(--red); }
+
+/* 紹介できる人バッジ */
+.introduces-section { display: flex; flex-direction: column; gap: 6px; }
+.introduces-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; letter-spacing: .1em; color: var(--muted);
+}
+.intro-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(46,125,66,.06);
+  border: 1.5px solid var(--ok);
+  border-radius: 10px; padding: 8px 12px;
+}
+.intro-chip-name { font-size: 12px; font-weight: 700; color: var(--ok); flex: 1; }
+.intro-chip-cond { font-family: 'Yomogi', cursive; font-size: 9px; color: var(--pencil); }
+
+/* ロック状態 */
+.detail-locked-msg {
+  text-align: center; padding: 40px 20px;
+  font-family: 'Yomogi', cursive;
+  font-size: 12px; color: var(--muted); line-height: 2;
+}
 </style>
 </head>
 <body>
-<div id="root">
-  <div class="hd">
-    <div class="hd-eyebrow">FRIENDS — 友達一覧</div>
-    <div class="hd-memo">誰を<br>連れていく？</div>
-    <div class="hd-title">仲間たち</div>
+<div class="phone">
+
+  <div class="status-bar">
+    <span class="status-bar-time" id="status-time">9:41</span>
+    <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
   </div>
 
-  <div class="filter-wrap">
-    <div class="filter-label">← グループで絞る</div>
-    <div class="filters">
-      <div class="ftab active" data-f="all" onclick="setFilter(this)">全員</div>
-      <div class="ftab" data-f="circle" onclick="setFilter(this)">サークル</div>
-      <div class="ftab" data-f="class" onclick="setFilter(this)">ゼミ</div>
-      <div class="ftab" data-f="part" onclick="setFilter(this)">バイト</div>
-      <div class="ftab" data-f="old" onclick="setFilter(this)">幼馴染</div>
+  <!-- ナビ（一覧） -->
+  <div id="nav-list">
+    <div class="nav-bar">
+      <button class="nav-back" onclick="location.href='../index.html'">← ホーム</button>
+      <div class="nav-title">友達一覧</div>
+      <div class="nav-right" id="nav-count" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);"></div>
+    </div>
+    <div class="filter-bar">
+      <div class="ftab active" data-f="all"    onclick="setFilter(this)">全員</div>
+      <div class="ftab"        data-f="circle" onclick="setFilter(this)">サークル</div>
+      <div class="ftab"        data-f="class"  onclick="setFilter(this)">ゼミ</div>
+      <div class="ftab"        data-f="part"   onclick="setFilter(this)">バイト</div>
+      <div class="ftab"        data-f="old"    onclick="setFilter(this)">幼馴染</div>
     </div>
   </div>
 
-  <div id="friends-area"></div>
-
-  <div class="back-wrap">
-    <button class="back-btn" onclick="history.back()">← 戻る</button>
+  <!-- ナビ（詳細） -->
+  <div id="nav-detail" style="display:none;">
+    <div class="nav-bar">
+      <button class="nav-back" onclick="closeDetail()">← 一覧</button>
+      <div class="nav-title" id="nav-detail-name">—</div>
+      <div style="width:48px;"></div>
+    </div>
   </div>
-  <div class="pad"></div>
+
+  <!-- 一覧画面 -->
+  <div class="screen" id="list-screen">
+    <div id="list-area"></div>
+  </div>
+
+  <!-- 詳細画面 -->
+  <div class="screen" id="detail-screen">
+    <div class="detail-avatar-wrap">
+      <div class="detail-avatar-big" id="d-avatar">👤</div>
+      <div class="detail-dname" id="d-name">—</div>
+      <div class="detail-dtype" id="d-type">—</div>
+    </div>
+    <div class="detail-body" id="d-body"></div>
+  </div>
+
 </div>
 
 <script src="../data/gamedata.js"></script>
 <script src="../data/gamestate.js"></script>
 <script src="../data/flags.js"></script>
 <script>
-const CFG = loadConfig();
-let currentFilter='all';
+GameState.load();
 
-const GRADE=v=>v>=81?'◎◎':v>=61?'◎':v>=41?'○':v>=21?'△':'×';
-const GCLS=v=>v>=81?'grade-ss':v>=61?'grade-s':v>=41?'grade-a':v>=21?'grade-b':'grade-x';
-const PLABELS={comm:'コミュ',visu:'ビジュ',head:'頭',tact:'手際',air:'空気',mental:'心',sake:'酒'};
-const GROUP_LABELS={circle:'サークル仲間',class:'授業・ゼミ仲間',part:'バイト仲間',old:'幼馴染'};
-const GROUPS=['circle','class','part','old'];
+// 時計
+function updateClock() {
+  const d = new Date();
+  document.getElementById('status-time').textContent =
+    d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+updateClock();
+setInterval(updateClock, 10000);
 
-function setFilter(el){
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+const PLABELS = {comm:'コミュ',visu:'ビジュ',head:'頭',tact:'手際',air:'空気',mental:'心'};
+const GROUP_LABELS = {circle:'サークル仲間', class:'ゼミ仲間', part:'バイト仲間', old:'幼馴染'};
+const GROUP_ICONS  = {circle:'⚽', class:'📚', part:'☕', old:'👥'};
+const GROUPS = ['circle','class','part','old'];
+
+const discovered = GameState._data?.discoveredFriends || [];
+
+function isAvailable(c) {
+  if (c.locked) return false;
+  if (c.discoverable) return discovered.includes(c.id);
+  const cfg = loadConfig() || {};
+  const sameCircle = cfg.circle !== 'none' && c.circle === cfg.circle;
+  const samePart   = cfg.part   !== 'none' && c.part   === cfg.part;
+  const isCommon   = c.group === 'old' || c.group === 'class';
+  return sameCircle || samePart || isCommon || discovered.includes(c.id);
+}
+
+function getIntimacy(c) {
+  return GameState._data?.friendRelation?.[c.id]?.intimacy || 0;
+}
+
+let currentFilter = 'all';
+
+function setFilter(el) {
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  currentFilter=el.dataset.f;
-  render();
+  currentFilter = el.dataset.f;
+  renderList();
 }
 
-function getIntimacy(c){
-  // localStorage からゲーム状態があれば取得、なければ0
-  const state=JSON.parse(localStorage.getItem('goukon_friend_state')||'{}');
-  return state[c.id]?.intimacy||0;
-}
+function renderList() {
+  const area = document.getElementById('list-area');
+  let html = '';
+  let total = 0;
 
-function getStatusLabel(c,intimacy){
-  if(c.locked) return {label:'まだ会っていない',cls:'status-normal'};
-  if(intimacy>=60) return {label:'仲いい',cls:'status-good'};
-  if(intimacy>=30) return {label:'顔見知り',cls:'status-normal'};
-  return {label:'接点あり',cls:'status-normal'};
-}
+  GROUPS.forEach(group => {
+    if (currentFilter !== 'all' && currentFilter !== group) return;
+    const members = CHARACTERS.filter(c => c.group === group && isAvailable(c));
+    if (!members.length) return;
+    total += members.length;
 
-function render(){
-  const area=document.getElementById('friends-area');
-  area.innerHTML='';
-
-  GROUPS.forEach(group=>{
-    const members=CHARACTERS.filter(c=>c.group===group&&(currentFilter==='all'||currentFilter===group));
-    if(!members.length) return;
-
-    const glabel=document.createElement('div');
-    glabel.className='group-label';
-    glabel.innerHTML=`<div class="group-dot"></div>${GROUP_LABELS[group]}`;
-    area.appendChild(glabel);
-
-    const list=document.createElement('div');
-    list.className='friend-list';
-
-    members.forEach(c=>{
-      const intimacy=getIntimacy(c);
-      const status=getStatusLabel(c,intimacy);
-      const fc=FRIEND_COMMANDS[c.id];
-
-      const card=document.createElement('div');
-      card.className='fc'+(c.locked?' locked':'');
-      card.onclick=()=>toggleDetail(card);
-
-      // パラメータ表示
-      const paramsHtml=Object.entries(PLABELS).map(([k,label])=>`
-        <div class="fp">
-          <span class="fp-name">${label}</span>
-          <span class="fp-val ${GCLS(c.params[k]||0)}">${GRADE(c.params[k]||0)}</span>
-        </div>`).join('');
-
-      // 特性バッジ
-      const traitsHtml=(c.traits||[]).map(t=>{
-        const cls=t==='暴走しやすい'||t==='惚れっぽい'?'danger':t==='譲れる'?'good':'';
-        return `<span class="trait ${cls}">${t}</span>`;
-      }).join('');
-
-      // 固有コマンド
-      const cmdHtml=fc?`
-        <div class="fc-cmd">
-          <div class="fc-cmd-label">固有コマンド（親密度${fc.unlock}以上で解放）</div>
-          <div class="fc-cmd-name">${fc.name}</div>
-          <div class="fc-cmd-desc">${c.note}</div>
-        </div>`:'' ;
-
-      card.innerHTML=`
-        ${c.locked?`<div class="lock-badge">🔒 未解放</div>`:''}
-        <div class="fc-top">
-          <div class="fc-name">${c.name}</div>
-          <div class="fc-group">${c.tag}</div>
-          <div class="fc-status ${status.cls}">${status.label}</div>
-        </div>
-        <div class="fc-params">${paramsHtml}</div>
-        <div class="fc-bars">
-          <div class="fc-bar-row">
-            <div class="fc-bar-label">現在値</div>
-            <div class="fc-bar-track"><div class="fc-bar-fill fill-current" style="width:${Math.round(Object.values(c.params).reduce((a,b)=>a+b,0)/7)}%"></div></div>
+    html += `<div class="section-header">${GROUP_ICONS[group]} ${GROUP_LABELS[group]}</div>`;
+    members.forEach(c => {
+      const intimacy = getIntimacy(c);
+      html += `
+        <div class="friend-row" onclick="openDetail(${c.id})">
+          <div class="friend-icon">
+            ${GROUP_ICONS[c.group]}
           </div>
-          <div class="fc-bar-row">
-            <div class="fc-bar-label">MAX値</div>
-            <div class="fc-bar-track"><div class="fc-bar-fill fill-max" style="width:${Math.round(Object.values(c.maxParams).reduce((a,b)=>a+b,0)/7)}%"></div></div>
+          <div class="friend-info">
+            <div class="friend-name">${c.name}</div>
+            <div class="friend-tag">${c.type}</div>
           </div>
-          <div class="fc-bar-row">
-            <div class="fc-bar-label">親密度</div>
-            <div class="fc-bar-track"><div class="fc-bar-fill fill-intimacy" style="width:${intimacy}%"></div></div>
+          <div class="friend-right">
+            <div class="intimacy-val">親密 ${intimacy}</div>
+            <div class="intimacy-bar-wrap">
+              <div class="intimacy-bar-fill" style="width:${Math.min(100,intimacy)}%"></div>
+            </div>
           </div>
-        </div>
-        <div class="fc-traits">${traitsHtml}</div>
-        <div class="fc-detail" id="detail-${c.id}">
-          <div class="fc-note ${c.limit?'warn':''}">${c.locked?'🔒 まだ接点がない。':c.limit?'⚠ '+c.limit+'　':''} ${c.note}</div>
-          ${cmdHtml}
+          <div class="friend-arrow">›</div>
         </div>`;
-      list.appendChild(card);
     });
-
-    area.appendChild(list);
   });
+
+  document.getElementById('nav-count').textContent = total + '人';
+  area.innerHTML = html || `<div style="padding:60px 20px;text-align:center;font-family:'Yomogi',cursive;font-size:11px;color:var(--muted);">表示できるメンバーがいません</div>`;
 }
 
-function toggleDetail(card){
-  const detail=card.querySelector('.fc-detail');
-  if(detail) detail.classList.toggle('open');
+function openDetail(cid) {
+  const c = CHARACTERS.find(x => x.id === cid);
+  if (!c) return;
+
+  const intimacy = getIntimacy(c);
+  const avgParam = Math.round(Object.values(c.params).reduce((a,b)=>a+b,0) / Object.keys(c.params).length);
+  const avgMax   = Math.round(Object.values(c.maxParams).reduce((a,b)=>a+b,0) / Object.keys(c.maxParams).length);
+
+  document.getElementById('nav-detail-name').textContent = c.name.split(' ')[1] || c.name;
+  document.getElementById('d-avatar').textContent = GROUP_ICONS[c.group];
+  document.getElementById('d-name').textContent = c.name;
+  document.getElementById('d-type').textContent = c.type;
+
+  // 紹介できる人リスト
+  const introPending = (c.introduces || []).filter(i => {
+    const targetAvail = discovered.includes(i.id) || CHARACTERS.find(x=>x.id===i.id&&!x.discoverable&&isAvailable(x));
+    return !targetAvail && intimacy < i.minIntimacy;
+  });
+  const introDone = (c.introduces || []).filter(i => {
+    const target = CHARACTERS.find(x => x.id === i.id);
+    return target && (discovered.includes(i.id) || isAvailable(target));
+  });
+
+  const intimacyPct = Math.min(100, intimacy);
+  const avgPct = Math.min(100, avgParam);
+  const avgMaxPct = Math.min(100, avgMax);
+
+  const traitsHtml = (c.traits || []).map(t => {
+    const cls = (t === '暴走しやすい' || t === '惚れっぽい') ? 'danger'
+              : t === '譲れる' ? 'safe' : '';
+    return `<span class="trait ${cls}">${t}</span>`;
+  }).join('');
+
+  const paramsHtml = Object.entries(PLABELS).map(([k, label]) => `
+    <div class="param-cell">
+      <span class="param-name">${label}</span>
+      <span class="param-grade ${GRADE_CLASS(c.params[k]||0)}">${GRADE(c.params[k]||0)}</span>
+    </div>`).join('');
+
+  const introducesHtml = (c.introduces || []).length ? `
+    <div class="introduces-section">
+      <div class="introduces-label">INTRODUCES — 紹介できる人</div>
+      ${(c.introduces || []).map(i => {
+        const target = CHARACTERS.find(x => x.id === i.id);
+        if (!target) return '';
+        const unlocked = discovered.includes(i.id) || isAvailable(target);
+        return `
+          <div class="intro-chip" style="${unlocked ? 'opacity:.5;' : ''}">
+            <span style="font-size:16px;">${unlocked ? '✅' : '🤝'}</span>
+            <span class="intro-chip-name">${target.name}</span>
+            <span class="intro-chip-cond">${unlocked ? '紹介済み' : `親密度${i.minIntimacy}で紹介`}</span>
+          </div>`;
+      }).join('')}
+    </div>` : '';
+
+  document.getElementById('d-body').innerHTML = `
+    <div class="detail-meter-card">
+      <div class="detail-meter-title">RELATIONSHIP</div>
+      <div class="meter-row">
+        <div class="meter-label">親密度</div>
+        <div class="meter-track"><div class="meter-fill fill-intimacy" style="width:${intimacyPct}%"></div></div>
+        <div class="meter-val">${intimacy}</div>
+      </div>
+      <div class="meter-row">
+        <div class="meter-label">現在値</div>
+        <div class="meter-track"><div class="meter-fill fill-avg" style="width:${avgPct}%"></div></div>
+        <div class="meter-val">${avgParam}</div>
+      </div>
+      <div class="meter-row">
+        <div class="meter-label">MAX値</div>
+        <div class="meter-track"><div class="meter-fill" style="width:${avgMaxPct}%;background:var(--pencil);opacity:.7;"></div></div>
+        <div class="meter-val">${avgMax}</div>
+      </div>
+    </div>
+
+    <div class="detail-params">
+      <div class="detail-params-title">PARAMETERS</div>
+      <div class="params-grid">${paramsHtml}</div>
+    </div>
+
+    <div class="detail-traits">${traitsHtml}</div>
+
+    <div class="detail-note ${c.limit ? 'warn' : ''}">
+      ${c.limit ? '⚠ ' + c.limit + '<br>' : ''}${c.note || ''}
+    </div>
+
+    ${introducesHtml}
+  `;
+
+  // スライドアニメーション
+  document.getElementById('list-screen').classList.add('pushed');
+  const det = document.getElementById('detail-screen');
+  det.style.display = 'flex';
+  document.getElementById('nav-list').style.display   = 'none';
+  document.getElementById('nav-detail').style.display = 'block';
+  requestAnimationFrame(() => requestAnimationFrame(() => det.classList.add('open')));
 }
 
-render();
+function closeDetail() {
+  const det = document.getElementById('detail-screen');
+  det.classList.remove('open');
+  document.getElementById('list-screen').classList.remove('pushed');
+  setTimeout(() => {
+    det.style.display = 'none';
+    document.getElementById('nav-list').style.display   = 'block';
+    document.getElementById('nav-detail').style.display = 'none';
+  }, 260);
+}
+
+renderList();
 </script>
 </body>
 </html>

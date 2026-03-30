@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════
 // 依存: gamedata.js (PARAM_KEYS, MONEY_MAP, CHARACTERS, HEROINES)
 
-const SAVE_KEY = 'goukon_config';
+// SAVE_KEY は gamedata.js で定義済み
 
 // ── GameState ─────────────────────────────────────
 const GameState = {
@@ -20,10 +20,7 @@ const GameState = {
   },
 
   /** 新規ゲーム開始（キャラクリ完了時に呼ぶ） */
-  newGame(living, circle, part, selfParams) {
-    const actual = {};
-    PARAM_KEYS.forEach(k => { actual[k] = Math.floor(Math.random() * 100) + 1; });
-
+  newGame(living, circle, part) {
     const friendRelation  = {};
     const heroineRelation = {};
 
@@ -47,11 +44,6 @@ const GameState = {
       living, circle, part,
       money: MONEY_MAP[living] || 30000,
 
-      // 主人公のパラメータ
-      self:   { ...selfParams },
-      actual: { ...actual },
-      revealedParams: [],
-
       // 時間
       year:  1,
       month: 4,
@@ -62,6 +54,9 @@ const GameState = {
       // 関係値
       friendRelation,
       heroineRelation,
+
+      // 紹介で解放された友達IDリスト
+      discoveredFriends: [],
 
       // フラグ（flags.jsが管理）
       flags: [],
@@ -84,12 +79,9 @@ const GameState = {
   get month()      { return this._data?.month || 4; },
   get money()      { return this._data?.money || 0; },
   get goukonCount(){ return this._data?.goukonCount || 0; },
-  get self()       { return this._data?.self   || {}; },
-  get actual()     { return this._data?.actual || {}; },
   get circle()     { return this._data?.circle || 'none'; },
   get living()     { return this._data?.living || 'home'; },
   get part()       { return this._data?.part   || 'none'; },
-  get revealedParams() { return this._data?.revealedParams || []; },
 
   // ── 時間管理 ────────────────────────────────────
 
@@ -178,25 +170,71 @@ const GameState = {
   startGoukon(partyIds) {
     if(!this._data) return;
     this._data.goukonCount++;
-    this._data.money = Math.max(0, this._data.money - 5000);
+    this._data.currentParty = partyIds || [];
     partyIds.forEach(id => this.incrementFriendUsed(id));
     this.save();
   },
 
   /** 合コン結果をまとめて保存（result.htmlから呼ぶ） */
-  finishGoukon(heroineResults) {
+  finishGoukon(heroineResults, partyIds) {
     // heroineResults: { heroineId: { heartGained, contact } }
+    const contactCount = Object.values(heroineResults).filter(r => r.contact).length;
+    const anyContact   = contactCount > 0;
+
     Object.entries(heroineResults).forEach(([hid, result]) => {
       this.updateHeroineAfterGoukon(parseInt(hid), result.heartGained || 0);
       if(result.contact) this.setContact(parseInt(hid));
     });
 
-    // 合コンごとに1〜2個パラメータを開示
-    const unrevealed = PARAM_KEYS.filter(k => !this.revealedParams.includes(k));
-    const toReveal   = unrevealed.slice(0, Math.min(2, unrevealed.length));
-    toReveal.forEach(k => this._data.revealedParams.push(k));
+    // 参加した友達の親密度を更新
+    const party = partyIds || this._data?.currentParty || [];
+    party.forEach(fid => {
+      const bonus = anyContact ? 10 : 5;
+      this.addFriendIntimacy(fid, bonus);
+    });
 
     this.save();
+  },
+
+  // ── 友達紹介解放 ────────────────────────────────────
+
+  /**
+   * 合コン後に呼ぶ。親密度が閾値を超えた友達の introduces を確認し、
+   * まだ未解放なら discoveredFriends に追加する。
+   * @returns {Array} 新たに解放されたキャラ情報 [{introducedBy, introduced, reason}]
+   */
+  checkFriendDiscovery() {
+    if(!this._data) return [];
+    if(!this._data.discoveredFriends) this._data.discoveredFriends = [];
+
+    const discovered = this._data.discoveredFriends;
+    const newlyFound = [];
+
+    CHARACTERS.forEach(c => {
+      if(!c.introduces || !c.introduces.length) return;
+      const rel = this._data.friendRelation?.[c.id];
+      if(!rel) return;
+      const intimacy = rel.intimacy || 0;
+
+      c.introduces.forEach(intro => {
+        // 既に解放済み or もともとlocked(まだ時期じゃない) はスキップ
+        if(discovered.includes(intro.id)) return;
+        if(intimacy < intro.minIntimacy) return;
+
+        const target = CHARACTERS.find(x => x.id === intro.id);
+        if(!target) return;
+
+        discovered.push(intro.id);
+        newlyFound.push({
+          introducedBy: c,
+          introduced:   target,
+          reason:       intro.reason,
+        });
+      });
+    });
+
+    if(newlyFound.length) this.save();
+    return newlyFound;
   },
 
   // ── お金管理 ────────────────────────────────────
@@ -219,24 +257,31 @@ const GameState = {
   calcEndingScore() {
     if(!this._data) return {};
 
-    const topRomance = Math.max(
-      ...Object.values(this._data.heroineRelation || {}).map(r => r.romance || 0)
-    );
-    const friendAvg = (() => {
-      const vals = Object.values(this._data.friendRelation || {}).map(r => r.intimacy || 0);
-      return vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : 0;
-    })();
+    const heroineVals = Object.values(this._data.heroineRelation || {});
+    const romances    = heroineVals.map(r => r.romance || 0);
+    const topRomance  = romances.length ? Math.max(...romances) : 0;
+
+    // allInLove判定用：最高romance保持者以外が全員30以下か
+    const topRomanceId = Object.keys(this._data.heroineRelation || {})
+      .find(id => (this._data.heroineRelation[id].romance || 0) === topRomance);
+    const othersAllBelow30 = Object.entries(this._data.heroineRelation || {})
+      .filter(([id]) => id !== topRomanceId)
+      .every(([, r]) => (r.romance || 0) <= 30);
+
+    const friendVals = Object.values(this._data.friendRelation || {}).map(r => r.intimacy || 0);
+    const friendAvg  = friendVals.length
+      ? friendVals.reduce((a,b) => a+b, 0) / friendVals.length
+      : 0;
     const highFriendCount = Object.values(this._data.friendRelation || {})
       .filter(r => (r.intimacy || 0) >= 70).length;
-    const contactCount = Object.values(this._data.heroineRelation || {})
-      .filter(r => r.contact).length;
+    const contactCount = heroineVals.filter(r => r.contact).length;
 
     return {
       topRomance,
+      othersAllBelow30,
       friendAvg,
       highFriendCount,
       contactCount,
-      money:       this.money,
       goukonCount: this.goukonCount,
     };
   },
@@ -244,12 +289,18 @@ const GameState = {
   /** エンディング判定 */
   getEnding() {
     const s = this.calcEndingScore();
-    if(s.topRomance >= 80 && s.friendAvg >= 50) return 'perfect';       // 順風満帆
-    if(s.topRomance >= 80 && s.friendAvg < 30)  return 'allInLove';     // 全てを捧げた恋
-    if(s.topRomance < 40  && s.friendAvg >= 60) return 'friendship';    // 仲間と青春
-    if(s.highFriendCount >= 2)                   return 'bestFriend';    // 親友と二人三脚
-    if(s.contactCount === 0 && s.money >= 50000) return 'solo';         // ソロ充
-    if(s.topRomance < 30  && s.friendAvg < 30)  return 'lonely';       // 孤独な卒業
+    // perfect: 連絡先5人以上 & 友達平均50以上
+    if(s.contactCount >= 5 && s.friendAvg >= 50)             return 'perfect';
+    // allInLove: 特定1人のromance≥80、他全員が30以下
+    if(s.topRomance >= 80 && s.othersAllBelow30)             return 'allInLove';
+    // friendship: 恋愛度低め & 友達平均高め
+    if(s.topRomance < 40  && s.friendAvg >= 60)              return 'friendship';
+    // bestFriend: 親密70以上の友達が2人以上
+    if(s.highFriendCount >= 2)                                return 'bestFriend';
+    // solo: 連絡先ゼロで5回以上合コンに参加
+    if(s.contactCount === 0 && s.goukonCount >= 5)           return 'solo';
+    // lonely: どちらも低い
+    if(s.topRomance < 30  && s.friendAvg < 30)               return 'lonely';
     return 'normal';
   },
 };

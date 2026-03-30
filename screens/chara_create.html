@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>大学生活攻略録</title>
+<title>今夜のスタメン、君に決めた！</title>
 <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -529,7 +529,7 @@ input[type=range] {
     <div class="hd-date" id="hd-date">2025.04.01 — 入学式</div>
     <div class="hd-memo">ここ大事！</div>
     <div class="hd-title-wrap">
-      <div class="hd-title">大学生活<br>攻略録</div>
+      <div class="hd-title">今夜の<br>スタメン</div>
       <div class="hd-badge">キャラクター設定</div>
     </div>
   </div>
@@ -538,7 +538,6 @@ input[type=range] {
     <div class="prog-item active" id="pr-1">居住</div>
     <div class="prog-item" id="pr-2">サークル</div>
     <div class="prog-item" id="pr-3">バイト</div>
-    <div class="prog-item" id="pr-4">自己認識</div>
   </div>
 
   <!-- 01 居住 -->
@@ -549,41 +548,38 @@ input[type=range] {
       <div class="sec-underline"></div>
     </div>
     <div class="opts">
-      <div class="opt" data-g="living" data-v="home" data-m="40000" onclick="pick(this)">
+      <div class="opt" data-g="living" data-v="home" onclick="pick(this)">
         <div class="opt-check">○</div>
         <div class="opt-body">
           <div class="opt-name">実家暮らし</div>
-          <div class="opt-desc">お金の心配は少ない。でも自由がなぁ…</div>
+          <div class="opt-desc">精神的に安定してる。でも自由がなぁ…</div>
         </div>
         <div class="opt-tags">
-          <span class="fx fx-p">金に余裕</span>
+          <span class="fx fx-p">メンタル安定</span>
           <span class="fx fx-m">行動制約</span>
         </div>
-        <div class="opt-money">¥40K</div>
       </div>
-      <div class="opt" data-g="living" data-v="alone_send" data-m="30000" onclick="pick(this)">
+      <div class="opt" data-g="living" data-v="alone_send" onclick="pick(this)">
         <div class="opt-check">○</div>
         <div class="opt-body">
           <div class="opt-name">一人暮らし<br>仕送りあり</div>
-          <div class="opt-desc">自由！バイトは気が向いたら。</div>
+          <div class="opt-desc">自由！身だしなみにも気を使える。</div>
         </div>
         <div class="opt-tags">
           <span class="fx fx-p">自由度高</span>
-          <span class="fx fx-n">バイト任意</span>
+          <span class="fx fx-p">ビジュ磨ける</span>
         </div>
-        <div class="opt-money">¥30K</div>
       </div>
-      <div class="opt" data-g="living" data-v="alone_nosend" data-m="15000" onclick="pick(this)">
+      <div class="opt" data-g="living" data-v="alone_nosend" onclick="pick(this)">
         <div class="opt-check">○</div>
         <div class="opt-body">
           <div class="opt-name">一人暮らし<br>仕送りなし</div>
-          <div class="opt-desc">バイト必須。でもその分仲間ができる。</div>
+          <div class="opt-desc">バイト必須。段取り力と人脈が鍛えられる。</div>
         </div>
         <div class="opt-tags">
           <span class="fx fx-m">バイト必須</span>
-          <span class="fx fx-p">絆が深まる</span>
+          <span class="fx fx-p">手際と絆が育つ</span>
         </div>
-        <div class="opt-money">¥15K</div>
       </div>
     </div>
   </div>
@@ -687,68 +683,6 @@ input[type=range] {
     </div>
   </div>
 
-  <!-- 04 自己認識 -->
-  <div class="sec" id="sec-self">
-    <div class="sec-head">
-      <div class="sec-num">4</div>
-      <div class="sec-label">自分ってどんな人？（自己申告）</div>
-      <div class="sec-underline"></div>
-    </div>
-    <div class="sp-notice">
-      ※ あくまで「自分がそう思ってる」だけです。<br>本当のところは、やってみないとわからない。
-    </div>
-    <div class="sp-rows" style="margin-left:34px">
-      <div class="sp-row">
-        <div class="sp-name">コミュ力</div>
-        <div class="sp-mid">
-          <div class="sp-pips" id="pp-comm"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
-          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-comm" style="width:50%"></div></div><div class="sp-thumb" id="st-comm" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('comm',this.value)"></div>
-        </div>
-        <div class="sp-grade" id="sg-comm">○</div>
-      </div>
-      <div class="sp-row">
-        <div class="sp-name">ビジュ</div>
-        <div class="sp-mid">
-          <div class="sp-pips" id="pp-visu"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
-          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-visu" style="width:50%"></div></div><div class="sp-thumb" id="st-visu" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('visu',this.value)"></div>
-        </div>
-        <div class="sp-grade" id="sg-visu">○</div>
-      </div>
-      <div class="sp-row">
-        <div class="sp-name">頭</div>
-        <div class="sp-mid">
-          <div class="sp-pips" id="pp-head"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
-          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-head" style="width:50%"></div></div><div class="sp-thumb" id="st-head" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('head',this.value)"></div>
-        </div>
-        <div class="sp-grade" id="sg-head">○</div>
-      </div>
-      <div class="sp-row">
-        <div class="sp-name">手際</div>
-        <div class="sp-mid">
-          <div class="sp-pips" id="pp-tact"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
-          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-tact" style="width:50%"></div></div><div class="sp-thumb" id="st-tact" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('tact',this.value)"></div>
-        </div>
-        <div class="sp-grade" id="sg-tact">○</div>
-      </div>
-      <div class="sp-row">
-        <div class="sp-name">空気読み</div>
-        <div class="sp-mid">
-          <div class="sp-pips" id="pp-air"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
-          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-air" style="width:50%"></div></div><div class="sp-thumb" id="st-air" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('air',this.value)"></div>
-        </div>
-        <div class="sp-grade" id="sg-air">○</div>
-      </div>
-      <div class="sp-row">
-        <div class="sp-name">メンタル</div>
-        <div class="sp-mid">
-          <div class="sp-pips" id="pp-mental"><div class="sp-pip on"></div><div class="sp-pip on"></div><div class="sp-pip on hot"></div><div class="sp-pip"></div><div class="sp-pip"></div></div>
-          <div class="sp-track"><div class="sp-bg"><div class="sp-fill" id="sf-mental" style="width:50%"></div></div><div class="sp-thumb" id="st-mental" style="left:50%"></div><input type="range" min="1" max="100" value="50" oninput="slide('mental',this.value)"></div>
-        </div>
-        <div class="sp-grade" id="sg-mental">○</div>
-      </div>
-    </div>
-  </div>
-
   <!-- CONFIRM -->
   <div class="confirm-wrap">
     <div class="confirm">
@@ -760,14 +694,13 @@ input[type=range] {
         <div class="confirm-row"><span class="confirm-key">住まい</span><span class="confirm-val empty" id="cv-living">—</span></div>
         <div class="confirm-row"><span class="confirm-key">サークル</span><span class="confirm-val empty" id="cv-circle">—</span></div>
         <div class="confirm-row"><span class="confirm-key">バイト</span><span class="confirm-val empty" id="cv-part">—</span></div>
-        <div class="confirm-row"><span class="confirm-key">初期資金</span><span class="confirm-val empty" id="cv-money">—</span></div>
       </div>
     </div>
   </div>
 
   <div class="btn-wrap">
     <button class="start-btn" id="start-btn" disabled onclick="startGame()">
-      大学生活、はじめる！
+      スタメンを決めろ！
     </button>
   </div>
 
@@ -775,16 +708,12 @@ input[type=range] {
 
 <script>
 const S={living:null,circle:null,part:null};
-const V={comm:50,visu:50,head:50,tact:50,air:50,mental:50};
-// MONEY_MAP は gamedata.js で定義
 const LABEL={
   living:{home:'実家暮らし',alone_send:'一人暮らし(仕送りあり)',alone_nosend:'一人暮らし(仕送りなし)'},
   circle:{none:'入らない',culture:'文化系',sports:'体育会系'},
   part:{none:'しない',izakaya:'居酒屋・飲食',cafe:'カフェ・販売',juku:'塾講師'},
 };
-const GRADE=v=>v>=81?'◎◎':v>=61?'◎':v>=41?'○':v>=21?'△':'×';
-const GCLS=v=>v>=61?'high':v<=20?'low':'';
-const ORDER=['living','circle','part','self'];
+const ORDER=['living','circle','part'];
 
 function pick(el){
   const g=el.dataset.g,v=el.dataset.v;
@@ -814,19 +743,6 @@ function pick(el){
   }
 }
 
-function slide(k,raw){
-  const v=parseInt(raw);V[k]=v;
-  document.getElementById('sf-'+k).style.width=v+'%';
-  document.getElementById('st-'+k).style.left=v+'%';
-  const g=document.getElementById('sg-'+k);
-  g.textContent=GRADE(v);g.className='sp-grade '+GCLS(v);
-  const lvl=Math.ceil(v/20);
-  document.querySelectorAll(`#pp-${k} .sp-pip`).forEach((p,i)=>{
-    p.classList.toggle('on',i<lvl);
-    p.classList.toggle('hot',i===lvl-1&&i<5);
-  });
-}
-
 function updateProgress(){
   let done=0;
   ['living','circle','part'].forEach((g,i)=>{
@@ -835,8 +751,6 @@ function updateProgress(){
     if(S[g]){el.classList.add('done');done++;}
     else if(done===i){el.classList.add('active');}
   });
-  const p4=document.getElementById('pr-4');
-  p4.className='prog-item'+(done===3?' active':'');
 }
 
 function updateConfirm(){
@@ -848,9 +762,6 @@ function updateConfirm(){
   set('cv-living',S.living?LABEL.living[S.living]:null,!S.living);
   set('cv-circle',S.circle?LABEL.circle[S.circle]:null,!S.circle);
   set('cv-part',S.part?LABEL.part[S.part]:null,!S.part);
-  const m=document.getElementById('cv-money');
-  m.textContent=S.living?'¥'+MONEY[S.living].toLocaleString():'—';
-  m.className='confirm-val'+(S.living?' money':' empty');
 }
 
 function checkReady(){
@@ -886,7 +797,7 @@ document.getElementById('hd-date').textContent=
   d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0')+' — 入学式';
 
 function startGame(){
-  const config = createNewConfig(S.living, S.circle, S.part, {...V});
+  const config = createNewConfig(S.living, S.circle, S.part);
   saveConfig(config);
   location.href='formation.html';
 }

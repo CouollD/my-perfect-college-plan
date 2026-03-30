@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>大学生活攻略録 — 合コン</title>
+<title>今夜のスタメン — 合コン当日</title>
 <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/base.css">
 <style>
@@ -211,6 +211,39 @@ body{
   margin:6px 0 4px;padding-bottom:3px;
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
+/* ターゲット選択パネル */
+.target-picker{
+  background:rgba(20,16,12,0.98);
+  border:1px solid rgba(192,57,43,0.35);
+  border-radius:8px;padding:8px;
+  display:flex;gap:5px;align-items:stretch;
+  margin-top:3px;
+}
+.target-btn{
+  flex:1;min-width:0;
+  padding:7px 4px;
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:7px;
+  background:rgba(255,255,255,0.04);
+  color:#f5f0e6;
+  font-family:'Yomogi',cursive;font-size:9px;
+  cursor:pointer;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:background .12s,border-color .12s;
+}
+.target-btn:hover{background:rgba(192,57,43,0.15);border-color:rgba(192,57,43,0.5);}
+.target-btn .tb-name{font-weight:700;font-size:10px;}
+.target-btn .tb-pos{font-size:7px;color:#7a6a5a;}
+.target-cancel-row{
+  display:flex;justify-content:flex-end;align-items:center;
+  padding:4px 2px 0;
+}
+.target-cancel{
+  font-family:'Yomogi',cursive;font-size:8px;color:#5a5048;
+  cursor:pointer;padding:2px 6px;
+  border:1px solid rgba(255,255,255,0.06);border-radius:4px;
+}
+.target-cancel:hover{color:#c0a070;}
 
 /* ── オープニング演出 ── */
 .opening{
@@ -251,6 +284,32 @@ body{
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.12);
   border-radius:8px;padding:4px 10px;
+}
+.opening-intro{
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;margin-bottom:16px;
+}
+.opening-intro-name{
+  font-family:'Yomogi',cursive;font-size:16px;font-weight:700;
+  color:#f5f0e6;letter-spacing:.08em;
+}
+.opening-intro-type{
+  font-family:'Yomogi',cursive;font-size:11px;color:#c8b89a;
+}
+.opening-intro-tags{
+  display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
+}
+.op-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  padding:2px 8px;border-radius:10px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.15);
+  color:#a09080;
+}
+.op-tag.highlight{
+  background:rgba(192,57,43,0.12);
+  border-color:rgba(192,57,43,0.4);
+  color:#e0a090;
 }
 .opening-tap{
   font-family:'Yomogi',cursive;font-size:10px;
@@ -363,20 +422,21 @@ const PARTY   = JSON.parse(localStorage.getItem('goukon_party')   ||'[1,3]');
 const H_IDS   = JSON.parse(localStorage.getItem('goukon_heroines')||'[101,102,103]');
 const CFG     = JSON.parse(localStorage.getItem('goukon_config')  ||'null');
 const SEATING = JSON.parse(localStorage.getItem('goukon_seating') ||'null');
-const SELF    = CFG?.self||{comm:50,visu:50,head:50,tact:50,air:50,mental:50,sake:50};
-const SELF_SEAT = SEATING?.selfSeat??1;
-const ADJ_H   = [SELF_SEAT>0?H_IDS[SELF_SEAT-1]:null,SELF_SEAT<2?H_IDS[SELF_SEAT+1]:null].filter(Boolean);
-const FRONT_H = H_IDS[SELF_SEAT];
+const SELF    = derivePlayerParams(CFG?.living||'home', CFG?.circle||'none', CFG?.part||'none');
+// 席は可変なのでGに持たせ、都度計算する関数を使う
+function getAdjH(){ const s=G?.selfSeat??1; return [s>0?H_IDS[s-1]:null,s<2?H_IDS[s+1]:null].filter(Boolean); }
+function getFrontH(){ return H_IDS[G?.selfSeat??1]; }
 
 // ── ゲーム状態 ──
 const G={
   phase:0,turn:0,apUsed:0,airGauge:60,
+  selfSeat: SEATING?.selfSeat??1,
   heart:{},prevHeart:{},
   obsession:{},monopoly:{},twoWorld:{},
   friendIntimacy:{},friendHeart:{},
   targetId:null,
   usedOneTime:new Set(),
-  nijikaiDone:false,contactDone:false,
+  nijikaiDone:false,nijikaiSuccess:false,contactDone:false,seatMoved:false,
   currentSituation:null,
   activeSprite:null, // 今表示中の立ち絵ID
 };
@@ -385,22 +445,26 @@ const PHASES=[
   {label:'乾杯',turns:2},
   {label:'会話',turns:3},
   {label:'盛り上がり',turns:3},
-  {label:'二次会',turns:2},
+  {label:'二次会',turns:3},   // phase3: 二次会に誘う成功時のみ到達
   {label:'お開き',turns:2},
 ];
 
 // ── 立ち絵ヘルパー ──
 function imgPath(type, id, expr='normal'){
-  // type: 'h'(heroine) or 'm'(man)
-  // 画像がなければSVGフォールバック
-  return `../images/${type}${id}_${expr}.svg`;
+  // ヒロインはPNG、男性はSVG
+  const ext = type === 'h' ? 'png' : 'svg';
+  return `../images/${type}${id}_${expr}.${ext}`;
 }
 function heartToExpr(h){
   return h>=71?'shy':h>=41?'happy':'normal';
 }
 
 // ── オープニング演出 ──
+const CIRCLE_LABEL = { sports:'体育会系サークル', culture:'文化系サークル', none:'サークルなし' };
+const PART_LABEL   = { izakaya:'居酒屋バイト', cafe:'カフェバイト', juku:'塾バイト', none:'バイトなし' };
+
 let openingStep=0;
+// steps: 0,1,2 = ヒロイン1〜3の自己紹介, 3 = 友達表示, 4 = 閉じる
 function initOpening(){
   showOpeningStep(0);
 }
@@ -411,20 +475,33 @@ function showOpeningStep(step){
   const sprites=document.getElementById('op-sprites');
   const names=document.getElementById('op-names');
 
-  if(step===0){
-    // 女性3人
-    label.textContent='今夜のメンバー（女性）';
-    sprites.innerHTML=H_IDS.map(hid=>{
-      const h=HEROINES.find(x=>x.id===hid);
-      return `<div class="opening-sprite"><img src="${imgPath('h',hid)}" onerror="this.style.display='none'" alt="${h?.name}"></div>`;
-    }).join('');
-    names.innerHTML=H_IDS.map(hid=>{
-      const h=HEROINES.find(x=>x.id===hid);
-      return `<div class="opening-name">${h?.name||hid}<br><span style="font-size:8px;opacity:.6">${h?.type?.split('・')[0]||''}</span></div>`;
-    }).join('');
-  } else if(step===1){
-    // 男性2人
-    label.textContent='今夜の布陣（友達）';
+  // ヒロイン個別自己紹介（右席→中央→左席の順）
+  if(step>=0 && step<=2){
+    const hid=H_IDS[2-step]; // 右(2)→中(1)→左(0)
+    const h=HEROINES.find(x=>x.id===hid);
+    const circleTag=CIRCLE_LABEL[h?.circle||'none'];
+    const partTag=PART_LABEL[h?.part||'none'];
+    const cfg=loadConfig();
+    // プレイヤーと共通する属性はハイライト
+    const circleMatch=cfg&&h?.circle&&h.circle!=='none'&&h.circle===cfg.circle;
+    const partMatch  =cfg&&h?.part  &&h.part  !=='none'&&h.part  ===cfg.part;
+    const seatLabel=['右','中央','左'][2-step];
+
+    label.textContent=`自己紹介 ${step+1}/3（${seatLabel}席）`;
+    sprites.innerHTML=`<div class="opening-sprite"><img src="${imgPath('h',hid)}" onerror="this.style.display='none'" alt="${h?.name}"></div>`;
+    names.innerHTML=`
+      <div class="opening-intro">
+        <div class="opening-intro-name">${h?.name||'?'}</div>
+        <div class="opening-intro-type">${h?.type||''}</div>
+        <div class="opening-intro-tags">
+          <span class="op-tag${circleMatch?' highlight':''}">${circleTag}</span>
+          <span class="op-tag${partMatch?' highlight':''}">${partTag}</span>
+        </div>
+      </div>`;
+
+  } else if(step===3){
+    // 友達表示
+    label.textContent='今夜の布陣';
     sprites.innerHTML=PARTY.map(fid=>{
       const c=CHARACTERS.find(x=>x.id===fid);
       return `<div class="opening-sprite"><img src="${imgPath('m',fid)}" onerror="this.style.display='none'" alt="${c?.name}"></div>`;
@@ -433,6 +510,7 @@ function showOpeningStep(step){
       const c=CHARACTERS.find(x=>x.id===fid);
       return `<div class="opening-name">${c?.name||fid}<br><span style="font-size:8px;opacity:.6">${(c?.traits||[]).slice(0,1).join('')||'—'}</span></div>`;
     }).join('');
+
   } else {
     // 閉じる
     op.classList.add('fade');
@@ -443,6 +521,10 @@ function openingTap(){showOpeningStep(openingStep+1);}
 
 // ── ゲーム初期化 ──
 function startGame(){
+  // GameState に合コン開始を記録
+  GameState.load();
+  GameState.startGoukon(PARTY);
+
   H_IDS.forEach(id=>{G.heart[id]=20;G.prevHeart[id]=20;});
   PARTY.forEach(id=>{
     G.obsession[id]=0;G.monopoly[id]=null;G.twoWorld[id]=null;
@@ -450,7 +532,7 @@ function startGame(){
     G.friendHeart[id]={};
     H_IDS.forEach(hid=>{G.friendHeart[id][hid]=10;});
   });
-  G.targetId=FRONT_H;
+  G.targetId=getFrontH();
 
   // シナジーボーナスを初期値に反映
   const syn = calcSynergy(PARTY, H_IDS, CFG);
@@ -469,7 +551,7 @@ function startGame(){
 function startPhase(idx){G.phase=idx;G.turn=0;G.apUsed=0;nextTurn();}
 
 function nextTurn(){
-  ADJ_H.forEach(id=>{G.heart[id]=Math.min(100,(G.heart[id]||20)+2);});
+  getAdjH().forEach(id=>{G.heart[id]=Math.min(100,(G.heart[id]||20)+2);});
   PARTY.forEach(fid=>{
     const traits=CHARACTERS.find(c=>c.id===fid)?.traits||[];
     const obs=G.obsession[fid]||0;
@@ -616,49 +698,19 @@ function buildCommands(){
   const air=G.airGauge;
   const airMod=air>=60?1.2:air>=40?1.0:0.6;
   const selfMod=SELF.comm/50;
-  const synCmdBonus = G.synBonuses?.cmdBonus||0; // シナジーによるコマンドボーナス
-  const synNijikai  = G.synBonuses?.nijikaiBonus||0;
   const sit=G.currentSituation;
-  const target=G.targetId;
+  const target=G.targetId||getFrontH();
   const tH=HEROINES.find(h=>h.id===target);
   const tn=tH?.name.split(' ')[1]||'ターゲット';
-  const isAdj=ADJ_H.includes(target);
+  const isAdj=getAdjH().includes(target);
   const cmds=[];
 
-  H_IDS.forEach(hid=>{
-    const h=HEROINES.find(x=>x.id===hid);if(!h)return;
-    const isFront=hid===FRONT_H,isAdjH=ADJ_H.includes(hid);
-    const bonus=isAdjH?3:0;
-    const boost=Math.round((8+bonus)*airMod*selfMod);
-    const tag=isFront?'正面':isAdjH?'隣':'';
-    cmds.push({id:`talk_${hid}`,icon:'💬',
-      name:`${h.name.split(' ')[1]}に話しかける`,
-      effect:`好感度+${boost}程度`,
-      desc:`${tag?tag+'の席。':''}コミュ力${SELF.comm}が効く。${isAdjH?'隣ボーナスあり。':''}`,
-      type:'normal',disabled:used||air<15});
-  });
-
-  const airBoost=Math.round(8*airMod*selfMod);
-  cmds.push({id:'boost_air',icon:'🎉',name:'場を盛り上げる',effect:`空気+${airBoost}、全員+3`,desc:'コミュ力依存。低リスク。自分は目立たない。',type:'normal',disabled:used});
-
-  PARTY.forEach(fid=>{
-    const fc=CHARACTERS.find(c=>c.id===fid);if(!fc)return;
-    const fn2=fc.name.split(' ')[1];
-    const traits=fc.traits||[];
-    cmds.push({id:`delegate_${fid}`,icon:'🤝',name:`${fn2}に任せる`,effect:'全員+4〜8、空気+5',desc:`${fn2}（${traits.slice(0,1).join('')||'普通'}）の特性が発動。`,type:'friend',disabled:used});
-  });
-
-  if(G.phase>=2&&SELF.head>=50) cmds.push({id:'deep_talk',icon:'🗣',name:`${tn}に深く話しかける`,effect:`成功で+${Math.round(15*airMod*(SELF.head/50))}`,desc:`頭${SELF.head}が効く。リスクあり。`,type:'risk',disabled:used});
-  if(G.phase>=2&&SELF.air>=55) cmds.push({id:'move_seat',icon:'🚶',name:`${tn}の隣に移動する`,effect:'成功で+12',desc:`空気読み${SELF.air}が効く。失敗で-6。`,type:'risk',disabled:used||isAdj});
-  if(G.phase>=3&&!G.nijikaiDone) cmds.push({id:'nijikai',icon:'🌙',name:'二次会に誘う',effect:'成功で全員+8',desc:`空気${air}以上で成功率↑。今回限り。`,type:'risk',disabled:used||air<35});
-  if(G.phase>=4&&!G.contactDone) cmds.push({id:'get_contact',icon:'📱',name:'連絡先を聞く',effect:'好感度50以上で成功',desc:'今回限りのコマンド。',type:'risk',disabled:used});
-
-  // 状況対応
+  // ── 対応コマンド（イベント応答・ターゲット不要）──
   if(sit){
     if(sit.type==='twoway'&&sit.friendId){
       const fn3=CHARACTERS.find(c=>c.id===sit.friendId)?.name.split(' ')[1];
       const hn3=HEROINES.find(h=>h.id===sit.heroineId)?.name.split(' ')[1];
-      cmds.push({id:'cutin_two',icon:'⚡',name:`${fn3}と${hn3}の間に割り込む`,effect:'2人の世界を崩す',desc:`空気-5。独占を防げる。`,type:'event',tag:'対応',disabled:used});
+      cmds.push({id:'cutin_two',icon:'⚡',name:`${fn3}と${hn3}の間に割り込む`,effect:'2人の世界を崩す',desc:'空気-5。独占を防げる。',type:'event',tag:'対応',disabled:used});
       cmds.push({id:'watch_two',icon:'👀',name:`${fn3}の邪魔をしない`,effect:`${fn3}好感度+15`,desc:'その子はもらえないかも。',type:'event',tag:'対応',disabled:used});
       cmds.push({id:'other_two',icon:'🎯',name:'別の子に集中する',effect:`${tn}好感度↑`,desc:'2人を放置して他の子を狙う。',type:'event',tag:'対応',disabled:used});
     }
@@ -667,27 +719,76 @@ function buildCommands(){
       cmds.push({id:`sig_stop_${sit.friendId}`,icon:'✋',name:`${fn4}に「もう引け」`,effect:'暴走リセット',desc:`${fn4}好感度-10。独占を崩す。`,type:'event',tag:'合図',disabled:used});
       cmds.push({id:`sig_go_${sit.friendId}`,icon:'👍',name:`${fn4}に「いっていいぞ」`,effect:`${fn4}好感度+5`,desc:'独占を認める。',type:'event',tag:'合図',disabled:used});
     }
-    if(sit.text?.includes('霊感')){
-      cmds.push({id:'cutin_weird',icon:'⚡',name:'話題を変える',effect:'成功で空気+10',desc:'コミュ力依存。',type:'event',tag:'対応',disabled:used});
-      cmds.push({id:'ride_weird',icon:'🔮',name:'乗っかる',effect:'電波系に+15',desc:'電波系には刺さる。他は引く。',type:'event',tag:'対応',disabled:used});
-    }
-    if(sit.text?.includes('沈黙')){
-      cmds.push({id:'break_silence',icon:'🗣',name:'沈黙を破る',effect:'空気+10〜15',desc:'コミュ力依存。',type:'event',tag:'対応',disabled:used});
-    }
-    if(sit.text?.includes('音頭')||sit.text?.includes('ゲーム')){
-      cmds.push({id:'ride_wave',icon:'🌊',name:'この流れに乗る',effect:'空気+8、全員+4',desc:'低リスク。',type:'event',tag:'対応',disabled:used});
-    }
-    if((sit.text?.includes('見た')||sit.text?.includes('見つめ'))&&sit.type==='info'){
-      cmds.push({id:'eye_contact',icon:'👁',name:'目が合ったら微笑む',effect:`${tn}好感度+10`,desc:'自然なアプローチ。',type:'event',tag:'対応',disabled:used});
-    }
   }
+
+  // ── 能動コマンド（ターゲット選択あり）──
+  const airBoost=Math.round(8*airMod*selfMod);
+  const talkBoost=Math.round(8*airMod*selfMod);
+
+  // 話しかける：ターゲット選択パネルで対象を決める
+  cmds.push({id:'talk',icon:'💬',name:'話しかける',
+    effect:`好感度+${talkBoost}〜${talkBoost+5}程度`,
+    desc:'ヒロインを選んで話しかける。コミュ力依存。',
+    type:'normal',needsTarget:'heroine',disabled:used||air<15});
+
+  // 場を盛り上げる：全員対象なのでターゲット不要
+  cmds.push({id:'boost_air',icon:'🎉',name:'場を盛り上げる',
+    effect:`空気+${airBoost}、全員+3`,
+    desc:'コミュ力依存。低リスク。自分は目立たない。',
+    type:'normal',disabled:used});
+
+  // タイプを聞く：全体コマンド、タイプ選択パネルを出す
+  cmds.push({id:'ask_type',icon:'💝',name:'タイプを聞く',
+    effect:'全員に影響（好み次第で±）',
+    desc:'右から順に宣言。自分のタイプも答える。',
+    type:'normal',needsPick:'type',disabled:used});
+
+  // ゲームをする：フェーズ1以降
+  if(G.phase>=1)
+    cmds.push({id:'game',icon:'🎰',name:'ゲームをする',
+      effect:`空気+15〜20、全員+5`,
+      desc:'場を一気に盛り上げる。',
+      type:'normal',disabled:used});
+
+  // 友達に任せる：ターゲット選択パネルで友達を決める
+  cmds.push({id:'delegate',icon:'🤝',name:'友達に任せる',
+    effect:'全員+4〜8、空気+5',
+    desc:'友達の特性が発動する。',
+    type:'friend',needsTarget:'friend',disabled:used});
+
+  // 以下はフェーズ解放コマンド：条件を満たさない場合はリストに追加しない
+  if(G.phase>=2&&SELF.head>=50)
+    cmds.push({id:'deep_talk',icon:'🗣',name:'深く話しかける',
+      effect:`成功で+${Math.round(15*airMod*(SELF.head/50))}`,
+      desc:`頭${SELF.head}が効く。ヒロインを選んで発動。リスクあり。`,
+      type:'risk',needsTarget:'heroine',disabled:used});
+  if(G.phase>=2&&SELF.air>=55&&!G.seatMoved)
+    cmds.push({id:'move_seat',icon:'🚶',name:'席替えを提案する',
+      effect:'成功で隣の子+12・席が変わる',
+      desc:`空気読み${SELF.air}が効く。失敗で場の空気-8。今回限り。`,
+      type:'risk',disabled:used});
+  if(G.phase>=2&&G.phase<3&&!G.nijikaiDone)
+    cmds.push({id:'nijikai',icon:'🌙',name:'二次会に誘う',
+      effect:'成功→二次会フェーズへ移行',
+      desc:`空気50以上で成功率↑。失敗すると全員-5。今回限り。`,
+      type:'risk',disabled:used||air<35});
+  if((G.phase===3||G.phase===4)&&!G.contactDone)
+    cmds.push({id:'get_contact',icon:'📱',name:'連絡先を聞く',
+      effect:G.phase===3?'好感度40以上で成功（二次会ボーナス中）':'好感度55以上で成功',
+      desc:'今回限りのコマンド。',
+      type:'risk',disabled:used});
 
   // 居酒屋シナジーコマンド
-  if(G.synergies?.some(s=>s.unlockCmd==='izakaya_team')){
-    cmds.push({id:'izakaya_team',icon:'🍺',name:'いつものノリで！',effect:'全員+12、空気+15',desc:'居酒屋仲間シナジー解放コマンド。場を一気に盛り上げる。',type:'friend',disabled:used});
-  }
+  if(G.synergies?.some(s=>s.unlockCmd==='izakaya_team'))
+    cmds.push({id:'izakaya_team',icon:'🍺',name:'いつものノリで！',
+      effect:'全員+12、空気+15',
+      desc:'居酒屋仲間シナジー発動。',
+      type:'friend',disabled:used});
 
-  cmds.push({id:'skip',icon:'💨',name:'静観する',effect:'友達の自律行動が強まる',desc:'何もしない。',type:'skip',disabled:used});
+  cmds.push({id:'skip',icon:'💨',name:'静観する',
+    effect:'友達の自律行動が強まる',
+    desc:'何もしない。',
+    type:'skip',disabled:used});
   return cmds;
 }
 
@@ -698,7 +799,7 @@ function execCmd(id){
   const air=G.airGauge;
   const airMod=air>=60?1.2:air>=40?1.0:0.6;
   const selfMod=SELF.comm/50;
-  const target=G.targetId||FRONT_H;
+  const target=G.targetId||getFrontH();
   const tH=HEROINES.find(h=>h.id===target);
   const tn=tH?.name.split(' ')[1]||'彼女';
   let rt='',rtype='good';
@@ -707,7 +808,7 @@ function execCmd(id){
     const hid=parseInt(id.replace('talk_',''));
     const h=HEROINES.find(x=>x.id===hid);
     const hn2=h?.name.split(' ')[1]||'彼女';
-    const isAdj2=ADJ_H.includes(hid);
+    const isAdj2=getAdjH().includes(hid);
     const boost=Math.round((7+Math.random()*6)*airMod*selfMod)+(isAdj2?3:0);
     const prev=G.heart[hid]||20;
     G.heart[hid]=Math.min(100,prev+boost);
@@ -751,13 +852,47 @@ function execCmd(id){
     else{const b=Math.round(14*airMod*(SELF.head/50));G.heart[target]=Math.min(100,(G.heart[target]||20)+b);rt=`「もっと聞かせてよ」\n${tn}との話が深まった！`;setStageActive('h',target,heartToExpr(G.heart[target]));}
 
   } else if(id==='move_seat'){
-    if(Math.random()<0.35){G.heart[target]=Math.max(0,(G.heart[target]||20)-6);rt=`移動が不自然だった。${tn}好感度↓`;rtype='warning';}
-    else{G.heart[target]=Math.min(100,(G.heart[target]||20)+12);rt=`自然に${tn}の隣に移動成功！`;setStageActive('h',target,heartToExpr(G.heart[target]));}
+    G.seatMoved=true;
+    const successRate=SELF.air>=70?0.75:SELF.air>=55?0.55:0.35;
+    if(Math.random()<successRate){
+      // 席をランダムにシャッフル → 自分の新しい席を決める
+      const newSeat=Math.floor(Math.random()*3);
+      G.selfSeat=newSeat;
+      G.targetId=getFrontH(); // 正面の子を新ターゲットに
+      const newFront=HEROINES.find(h=>h.id===getFrontH());
+      const newAdj=getAdjH().map(id=>HEROINES.find(h=>h.id===id)?.name.split(' ')[1]).join('・');
+      // 新しい隣の子に+12
+      getAdjH().forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+8);});
+      G.heart[getFrontH()]=Math.min(100,(G.heart[getFrontH()]||20)+12);
+      rt=`「じゃあ席替えしよう！」盛り上がった。\n正面：${newFront?.name.split(' ')[1]}、隣：${newAdj||'—'}`;
+      setStageAll();
+    } else {
+      G.airGauge=Math.max(0,G.airGauge-8);
+      rt=`タイミングが悪かった…場の空気-8。`;rtype='warning';
+    }
 
   } else if(id==='nijikai'){
     G.nijikaiDone=true;
-    if(G.airGauge>=50&&Math.random()<0.6){H_IDS.forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+8);});G.airGauge=Math.min(100,G.airGauge+8);rt=`「まだ終わらせない！」\n二次会の流れができた。全員+8、空気+8。`;}
-    else{H_IDS.forEach(hid=>{G.heart[hid]=Math.max(0,(G.heart[hid]||20)-5);});rt=`空気を読み間違えた…全員-5。`;rtype='warning';}
+    const successRate=G.airGauge>=70?0.8:G.airGauge>=50?0.6:0.3;
+    if(Math.random()<successRate){
+      G.nijikaiSuccess=true;
+      // 全員+10・空気+10ボーナス
+      H_IDS.forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+10);});
+      G.airGauge=Math.min(100,G.airGauge+10);
+      setStageAll();
+      // 場面転換オーバーレイ → phase3へ
+      showOv('🌙','二次会スタート！',
+        '「まだ終わらせたくない！」\n\n場所を変えて、より小さなお店へ。\nここからが本番。全員+10、空気+10。',
+        'つづける',()=>{
+          closeOv();
+          G.turn=PHASES[G.phase].turns; // 現フェーズ強制終了フラグ
+          startPhase(3);
+        });
+      return;
+    } else {
+      H_IDS.forEach(hid=>{G.heart[hid]=Math.max(0,(G.heart[hid]||20)-5);});
+      rt=`空気を読み間違えた…全員-5。`;rtype='warning';
+    }
     setStageAll();
 
   } else if(id==='get_contact'){
@@ -765,11 +900,16 @@ function execCmd(id){
     const maxH=Math.max(...H_IDS.map(hid=>G.heart[hid]||0));
     const topId=H_IDS.find(hid=>(G.heart[hid]||0)===maxH);
     const topH2=HEROINES.find(h=>h.id===topId);
-    if(maxH>=50){
+    // 連絡先を取った相手を記録
+    G.contactId=topId;
+    // 二次会フェーズ中は閾値40、お開きは55
+    const threshold=G.phase===3?40:55;
+    if(maxH>=threshold){
       setStageActive('h',topId,'shy');
-      showOv('📱',`${topH2?.name}と連絡先交換！`,`${topH2?.name}が少し照れながらスマホを差し出してきた。\n今夜は最高だった。`,'つづける',()=>{closeOv();finishTurn();});
+      const nijikaiLine=G.phase===3?`二次会の特別な空気が後押しした。\n`:'';
+      showOv('📱',`${topH2?.name}と連絡先交換！`,`${nijikaiLine}${topH2?.name}が少し照れながらスマホを差し出してきた。\n今夜は最高だった。`,'つづける',()=>{closeOv();finishTurn();});
       return;
-    } else{rt=`まだ早かったかもしれない…（目安：好感度50以上）`;rtype='warning';}
+    } else{rt=`まだ早かったかもしれない…（目安：好感度${threshold}以上）`;rtype='warning';}
 
   } else if(id==='cutin_two'){
     const fid2=G.currentSituation?.friendId;G.twoWorld[fid2]=null;G.obsession[fid2]=Math.max(0,(G.obsession[fid2]||0)-2);G.airGauge=Math.max(0,G.airGauge-5);
@@ -785,21 +925,42 @@ function execCmd(id){
     const fid5=parseInt(id.replace('sig_go_',''));const fn7=CHARACTERS.find(c=>c.id===fid5)?.name.split(' ')[1];G.friendIntimacy[fid5]=Math.min(100,(G.friendIntimacy[fid5]||50)+5);G.obsession[fid5]=Math.min(5,(G.obsession[fid5]||0)+1);const mhid=G.monopoly[fid5]||G.twoWorld[fid5];if(mhid)G.heart[mhid]=Math.min(100,(G.heart[mhid]||20)+8);rt=`${fn7}に「いっていいぞ」と合図。${fn7}が積極的に動き始めた。`;rtype='info';
   } else if(id==='cutin_weird'){
     if(Math.random()<0.4){G.airGauge=Math.max(0,G.airGauge-3);rt=`話題転換に失敗…空気-3。`;rtype='warning';}else{G.airGauge=Math.min(100,G.airGauge+10);rt=`うまく話題を変えた！空気+10。`;}
-  } else if(id==='ride_weird'){
-    const wH=H_IDS.find(hid=>HEROINES.find(h=>h.id===hid)?.type?.includes('電波'));if(wH){G.heart[wH]=Math.min(100,(G.heart[wH]||20)+15);rt=`乗っかった！電波系に刺さった。`;setStageActive('h',wH,'happy');}else{G.airGauge=Math.max(0,G.airGauge-8);rt=`誰にも刺さらなかった…空気-8。`;rtype='warning';}
-  } else if(id==='break_silence'){
-    if(Math.random()<0.35){rt=`沈黙を破ろうとしたが滑った…`;rtype='warning';}else{const b=Math.round(12*airMod*selfMod);G.airGauge=Math.min(100,G.airGauge+b);rt=`沈黙を自然に破った！空気+${b}。`;}
-  } else if(id==='ride_wave'){
-    G.airGauge=Math.min(100,G.airGauge+8);H_IDS.forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+4);});rt=`流れに乗った。空気+8、全員+4。`;setStageAll();
-  } else if(id==='eye_contact'){
-    G.heart[target]=Math.min(100,(G.heart[target]||20)+10);rt=`目が合って微笑んだ。${tn}好感度↑`;setStageActive('h',target,heartToExpr(G.heart[target]));
+  } else if(id==='game'){
+    const b=Math.round((14+Math.random()*8)*airMod);
+    G.airGauge=Math.min(100,G.airGauge+b);
+    H_IDS.forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+5);});
+    rt=`ゲームで盛り上がった！空気+${b}、全員+5。`;
+    setStageAll();
   } else if(id==='izakaya_team'){
     G.airGauge=Math.min(100,G.airGauge+15);
     H_IDS.forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+12);});
     rt=`いつものノリで！居酒屋仲間が一気に場を盛り上げた！空気+15。全員+12。`;
     setStageAll();
   } else if(id==='skip'){
-    PARTY.forEach(fid=>{const t=CHARACTERS.find(c=>c.id===fid)?.traits||[];if(t.includes('暴走しやすい')||t.includes('惚れっぽい'))G.obsession[fid]=Math.min(5,(G.obsession[fid]||0)+1);});rt=`静観した。友達が自律的に動いている…`;rtype='info';
+    // ランダムな友達が自律行動
+    const fid=PARTY[Math.floor(Math.random()*PARTY.length)];
+    const fc=CHARACTERS.find(c=>c.id===fid);
+    const fn=fc?.name.split(' ')[1]||'友達';
+    const traits=fc?.traits||[];
+    if(traits.includes('暴走しやすい')||traits.includes('惚れっぽい'))
+      G.obsession[fid]=Math.min(5,(G.obsession[fid]||0)+1);
+    if(Math.random()<0.65){
+      // 話しかける
+      const hid=H_IDS[Math.floor(Math.random()*H_IDS.length)];
+      const h=HEROINES.find(x=>x.id===hid);
+      const hn=h?.name.split(' ')[1]||'彼女';
+      const boost=Math.round(3+Math.random()*5);
+      G.heart[hid]=Math.min(100,(G.heart[hid]||20)+boost);
+      setStageActive('h',hid,heartToExpr(G.heart[hid]));
+      rt=`${fn}が${hn}に話しかけた。（${hn}+${boost}）`;
+    } else {
+      // 場を盛り上げる
+      const b=Math.round(4+Math.random()*5);
+      G.airGauge=Math.min(100,G.airGauge+b);
+      setStageAll();
+      rt=`${fn}が場を盛り上げた。空気+${b}。`;
+    }
+    rtype='info';
   }
 
   showResult(rt,rtype);
@@ -811,15 +972,34 @@ function finishTurn(){
   G.turn++;
   if(G.turn>=PHASES[G.phase].turns){
     if(G.phase>=4){endGame();return;}
+    // phase2終了: 二次会成功→phase3、それ以外→phase4(お開き)へスキップ
+    if(G.phase===2){
+      if(G.nijikaiSuccess){
+        // 二次会フェーズへ（オーバーレイはexecNijikaiSuccess内で表示済みなので直接移行）
+        startPhase(3);
+      } else {
+        showOv('👋',PHASES[4].label,'盛り上がりも落ち着いてきた。\n今夜最後のチャンス。','はじめる',()=>{closeOv();startPhase(4);});
+      }
+      return;
+    }
+    // phase3(二次会)終了→phase4(お開き)
+    if(G.phase===3){
+      showOv('👋',PHASES[4].label,'二次会も終盤。\n最後に決めろ。','はじめる',()=>{closeOv();startPhase(4);});
+      return;
+    }
     const next=G.phase+1;
-    const transText=['','乾杯が終わり会話が始まった。\n誰が誰に興味を持つか見えてくる。','会話が盛り上がってきた。\n友達の暴走に注意。','そろそろお開きの空気。\n二次会に持ち込めるか。','最後のチャンス。\n今動かないと後悔する。'];
+    const transText=['','乾杯が終わり会話が始まった。\n誰が誰に興味を持つか見えてくる。','会話が盛り上がってきた。\n連絡先を聞くチャンスをうかがえ。','',''];
     showOv(['🥂','💬','🎮','🌃','👋'][next],PHASES[next].label,transText[next],'はじめる',()=>{closeOv();startPhase(next);});
   } else nextTurn();
 }
 
 function endGame(){
   const r={};H_IDS.forEach(id=>{r[id]={heart:G.heart[id]||0,heartPrev:G.prevHeart[id]||0};});
-  localStorage.setItem('goukon_result',JSON.stringify({heroineStatus:r}));
+  localStorage.setItem('goukon_result',JSON.stringify({
+    heroineStatus:r,
+    contactId:G.contactId||null,
+    nijikaiSuccess:G.nijikaiSuccess||false,
+  }));
   location.href='result.html';
 }
 
@@ -897,25 +1077,171 @@ function renderCmds(){
   const used=G.apUsed>=1;
   document.getElementById('cmd-ap').textContent='AP '+(used?'○':'●');
 
-  const active=cmds.filter(c=>c.type==='event');
-  const normal=cmds.filter(c=>c.type!=='event'&&c.type!=='skip');
+  const event=cmds.filter(c=>c.type==='event');
+  const active=cmds.filter(c=>c.type!=='event'&&c.type!=='skip');
   const skip=cmds.filter(c=>c.type==='skip');
+
+  const makeDiv=(c)=>{
+    const div=document.createElement('div');
+    div.className='cmd '+(c.type==='friend'?'friend-type':c.type==='risk'?'risk-type':c.type==='event'?'event-type':c.type==='skip'?'skip-type':'')+(c.disabled?' disabled':'');
+    div.dataset.cmdId=c.id;
+    const arrowHint=(c.needsTarget||c.needsPick)?'<span style="font-size:8px;color:#7a6a5a;margin-left:4px">▶ 選択</span>':'';
+    div.innerHTML=`<div class="cmd-icon">${c.icon}</div><div class="cmd-body"><div class="cmd-name">${c.name}${arrowHint}</div>${c.effect?`<div class="cmd-effect">→ ${c.effect}</div>`:''}<div class="cmd-desc">${c.desc}</div></div>${c.type==='risk'?'<span class="cmd-tag tag-r">リスク</span>':c.type==='event'?`<span class="cmd-tag tag-e">${c.tag||'対応'}</span>`:c.type==='friend'?'<span class="cmd-tag tag-f">友達</span>':''}`;
+    if(!c.disabled){
+      div.onclick=()=>{
+        if(c.needsTarget){
+          const existing=grid.querySelector('.target-picker');
+          if(existing&&existing.dataset.for===c.id){existing.remove();return;}
+          showTargetPicker(c,div);
+        } else if(c.needsPick==='type'){
+          const existing=grid.querySelector('.target-picker');
+          if(existing&&existing.dataset.for==='ask_type'){existing.remove();return;}
+          showTypePicker(div);
+        } else {
+          closeTargetPicker();
+          execCmd(c.id);
+        }
+      };
+    }
+    return div;
+  };
 
   const addSec=(label,list)=>{
     if(!list.length)return;
     if(label){const d=document.createElement('div');d.className='section-divider';d.textContent=label;grid.appendChild(d);}
-    list.forEach(c=>{
-      const div=document.createElement('div');
-      div.className='cmd '+(c.type==='friend'?'friend-type':c.type==='risk'?'risk-type':c.type==='event'?'event-type':c.type==='skip'?'skip-type':'')+(c.disabled?' disabled':'');
-      div.innerHTML=`<div class="cmd-icon">${c.icon}</div><div class="cmd-body"><div class="cmd-name">${c.name}</div>${c.effect?`<div class="cmd-effect">→ ${c.effect}</div>`:''}<div class="cmd-desc">${c.desc}</div></div>${c.type==='risk'?'<span class="cmd-tag tag-r">リスク</span>':c.type==='event'?`<span class="cmd-tag tag-e">${c.tag||'対応'}</span>`:c.type==='friend'?'<span class="cmd-tag tag-f">友達</span>':''}`;
-      if(!c.disabled)div.onclick=()=>execCmd(c.id);
-      grid.appendChild(div);
-    });
+    list.forEach(c=>grid.appendChild(makeDiv(c)));
   };
 
-  if(active.length)addSec('── 今の状況への対応',active);
-  addSec(active.length?'── 能動的な行動':'',normal);
+  if(event.length)addSec('── 今の状況への対応',event);
+  addSec(event.length?'── 能動的な行動':'',active);
   addSec(null,skip);
+}
+
+function closeTargetPicker(){
+  document.querySelectorAll('.target-picker,.target-cancel-row').forEach(el=>el.remove());
+}
+
+function showTargetPicker(cmd,parentDiv){
+  closeTargetPicker();
+  const picker=document.createElement('div');
+  picker.className='target-picker';
+  picker.dataset.for=cmd.id;
+
+  let targets=[];
+  if(cmd.needsTarget==='heroine'){
+    targets=H_IDS.map(hid=>{
+      const h=HEROINES.find(x=>x.id===hid);
+      const isFront=hid===getFrontH(),isAdj=getAdjH().includes(hid);
+      return{id:hid,name:h?.name.split(' ')[1]||'?',pos:isFront?'正面':isAdj?'隣':''};
+    });
+  } else if(cmd.needsTarget==='friend'){
+    targets=PARTY.map(fid=>{
+      const fc=CHARACTERS.find(c=>c.id===fid);
+      const traits=(fc?.traits||[]).slice(0,1).join('');
+      return{id:fid,name:fc?.name.split(' ')[1]||'?',pos:traits};
+    });
+  }
+
+  targets.forEach(t=>{
+    const btn=document.createElement('button');
+    btn.className='target-btn';
+    btn.innerHTML=`<span class="tb-name">${t.name}</span>${t.pos?`<span class="tb-pos">${t.pos}</span>`:''}`;
+    btn.onclick=()=>{
+      closeTargetPicker();
+      if(cmd.id==='talk'||cmd.id==='deep_talk'){
+        G.targetId=t.id;
+        execCmd(cmd.id==='talk'?`talk_${t.id}`:'deep_talk');
+      } else if(cmd.id==='delegate'){
+        execCmd(`delegate_${t.id}`);
+      }
+    };
+    picker.appendChild(btn);
+  });
+
+  const cancelRow=document.createElement('div');
+  cancelRow.className='target-cancel-row';
+  cancelRow.dataset.for=cmd.id;
+  cancelRow.innerHTML='<span class="target-cancel">キャンセル</span>';
+  cancelRow.querySelector('.target-cancel').onclick=closeTargetPicker;
+
+  parentDiv.after(cancelRow);
+  parentDiv.after(picker);
+}
+
+// ── タイプ選択パネル（タイプを聞く）──
+function showTypePicker(parentDiv){
+  closeTargetPicker();
+  // PARTNER_TYPES からランダム3つ選ぶ
+  const shuffled=[...PARTNER_TYPES].sort(()=>Math.random()-0.5);
+  const choices=shuffled.slice(0,3);
+
+  const picker=document.createElement('div');
+  picker.className='target-picker';
+  picker.dataset.for='ask_type';
+  picker.style.flexWrap='wrap';
+
+  [...choices,'はぐらかす'].forEach(t=>{
+    const btn=document.createElement('button');
+    btn.className='target-btn';
+    btn.style.minWidth='calc(50% - 6px)';
+    btn.innerHTML=`<span class="tb-name">${t}</span>`;
+    btn.onclick=()=>{closeTargetPicker();execAskType(t);};
+    picker.appendChild(btn);
+  });
+
+  const cancelRow=document.createElement('div');
+  cancelRow.className='target-cancel-row';
+  cancelRow.dataset.for='ask_type';
+  cancelRow.innerHTML='<span class="target-cancel">キャンセル</span>';
+  cancelRow.querySelector('.target-cancel').onclick=closeTargetPicker;
+
+  parentDiv.after(cancelRow);
+  parentDiv.after(picker);
+}
+
+function execAskType(chosenType){
+  G.apUsed=1;
+  const air=G.airGauge;
+  const airMod=air>=60?1.2:air>=40?1.0:0.6;
+  let rt='',rtype='good';
+
+  if(chosenType==='はぐらかす'){
+    if(SELF.comm>=65){
+      H_IDS.forEach(hid=>{G.heart[hid]=Math.min(100,(G.heart[hid]||20)+5);});
+      rt='うまくはぐらかした！なんかいい感じ。全員+5。';
+      rtype='good';
+    } else {
+      H_IDS.forEach(hid=>{G.heart[hid]=Math.max(0,(G.heart[hid]||20)-3);});
+      rt='はぐらかしたが…なんか引かれた気がする。全員-3。';
+      rtype='warning';
+    }
+  } else {
+    // 右から順（逆順）に処理
+    const order=[...H_IDS].reverse();
+    const results=[];
+    order.forEach(hid=>{
+      const h=HEROINES.find(x=>x.id===hid);
+      const hn=h?.name.split(' ')[1]||'?';
+      const isMatch=h?.likes?.includes(chosenType);
+      if(isMatch){
+        const boost=Math.round((7+Math.random()*6)*airMod);
+        G.heart[hid]=Math.min(100,(G.heart[hid]||20)+boost);
+        results.push(`${hn}↑`);
+        setStageActive('h',hid,heartToExpr(G.heart[hid]));
+      } else {
+        const drop=Math.round(3+Math.random()*4);
+        G.heart[hid]=Math.max(0,(G.heart[hid]||20)-drop);
+        results.push(`${hn}↓`);
+      }
+    });
+    const ups=results.filter(r=>r.includes('↑')).length;
+    rt=`「${chosenType}が好きかな」\n${results.join(' ')}`;
+    rtype=ups>=2?'good':ups===1?'info':'warning';
+  }
+
+  showResult(rt,rtype);
+  renderUI();
+  setTimeout(finishTurn,900);
 }
 
 // ターゲット選択（女性カードタップ）

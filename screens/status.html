@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>大学生活攻略録 — 自分を知る</title>
+<title>今夜のスタメン — 自己分析</title>
 <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Shippori+Mincho+B1:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/base.css">
 <style>
@@ -82,6 +82,7 @@ body{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gr
 <body>
 <div id="root">
   <div class="hd">
+    <button onclick="history.back()" style="margin-left:48px;margin-bottom:8px;background:none;border:none;font-family:'Yomogi',cursive;font-size:11px;color:var(--pencil);cursor:pointer;padding:0;">← もどる</button>
     <div class="hd-eyebrow">SELF STATUS — 自分を知る</div>
     <div class="hd-memo">だんだん<br>わかってくる</div>
     <div class="hd-title">自己分析ノート</div>
@@ -145,7 +146,7 @@ const revealed = CFG?.revealedParams||[];
 const count  = CFG?.goukonCount||0;
 
 const PLABELS={comm:'コミュ力',visu:'ビジュ',head:'頭',tact:'手際',air:'空気読み',mental:'メンタル',sake:'酒の強さ'};
-const GRADE=v=>v>=81?'◎◎':v>=61?'◎':v>=41?'○':v>=21?'△':'×';
+// GRADE は gamedata.js で定義済み
 
 document.getElementById('hd-badge').textContent=`合コン${count}回目`;
 
